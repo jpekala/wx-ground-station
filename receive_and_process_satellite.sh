@@ -36,7 +36,7 @@ if [ -e $AUDIO_FILE ]
 
     /usr/local/bin/wxtoimg -m ${MAP_FILE} -e MCIR $AUDIO_FILE ${IMAGE_DIR}/${FILEKEY}-MCIR.png >> $LOGFILE 2>&1
 
-    /usr/local/bin/wxtoimg -m ${MAP_FILE} -e MCIR $AUDIO_FILE ${IMAGE_DIR}/${FILEKEY}-MCIR-precip.png >> $LOGFILE 2>&1
+    /usr/local/bin/wxtoimg -m ${MAP_FILE} -e MCIR-precip $AUDIO_FILE ${IMAGE_DIR}/${FILEKEY}-MCIR-precip.png >> $LOGFILE 2>&1
 
     /usr/local/bin/wxtoimg -m ${MAP_FILE} -e therm $AUDIO_FILE ${IMAGE_DIR}/${FILEKEY}-THERM.png >> $LOGFILE 2>&1
 
