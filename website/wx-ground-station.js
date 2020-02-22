@@ -414,6 +414,12 @@ function getUpcomingPassInfo() {
 
       setInterval(() => {
         staticMap.getSource('satellite-location').setData(getSatLocationPoint());
+        staticMap.flyTo({
+            center: [
+                getSatLocationPoint().coordinates[0],
+                getSatLocationPoint().coordinates[1]
+            ],
+          });
       }, 500);
 
       setInterval(() => {
