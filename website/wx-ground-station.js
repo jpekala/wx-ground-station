@@ -412,14 +412,24 @@ function getUpcomingPassInfo() {
         }
       });
 
+      staticMap.flyTo({
+        center: [
+          getSatLocationPoint().coordinates[0],
+          getSatLocationPoint().coordinates[1]
+        ],
+      });
+
+      setInterval(() => {
+        staticMap.flyTo({
+          center: [
+            getSatLocationPoint().coordinates[0],
+            getSatLocationPoint().coordinates[1]
+          ],
+        });
+      }, 25000);
+
       setInterval(() => {
         staticMap.getSource('satellite-location').setData(getSatLocationPoint());
-        staticMap.flyTo({
-            center: [
-                getSatLocationPoint().coordinates[0],
-                getSatLocationPoint().coordinates[1]
-            ],
-          });
       }, 500);
 
       setInterval(() => {
