@@ -233,7 +233,7 @@ function getUpcomingPassInfo() {
 
   $.get(DIR_NAME + "/upcoming_passes.json", function(data) {
     var now = new Date();
-    var processingTime = 180000; // approx 3 minutes to process and upload images.
+    var processingTime = 240000; // approx 3 minutes to process and upload images.
     for(var i=0;i<data.length;i++) {
       var passTime = new Date(data[i].end + processingTime);
       if ((!nextPass) && (passTime > now)) {
