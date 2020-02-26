@@ -51,7 +51,7 @@ Set the default region where your S3 bucket will reside in `~/.aws/config`. For 
 ```
 [default]
 output = json
-region = us-west-2
+region = us-west-1
 ```
 
 #### Create an S3 Bucket
@@ -79,9 +79,9 @@ To give public users the ability to access your S3 bucket using the AWS SDK, you
 
 ```
 // Initialize the Amazon Cognito credentials provider
-AWS.config.region = 'us-west-2'; // Region
+AWS.config.region = 'us-west-1'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-  IdentityPoolId: 'us-west-2:1d02ae39-3a06-497e-b63c-799a070dd09d',
+  IdentityPoolId: 'us-west-1:1d02ae39-3a06-497e-b63c-799a070dd09d',
 });
 ```
 
@@ -191,61 +191,61 @@ Now run `wxtoimg` once to accept the license agreement.
 wxtoimg
 ```
 
-Create a file `~/.wxtoimgrc` with the location of your base station. As usual, negative latitude is southern hemisphere, and negative longitude is western hemisphere. Here’s my location in Minnesota, USA.
+Create a file `~/.wxtoimgrc` with the location of your base station. As usual, negative latitude is southern hemisphere, and negative longitude is western hemisphere. Here is what it would look like for the White House as an example.
 
 ```
-Latitude: 45.0468
-Longitude: -93.4747
-Altitude: 315
+Latitude: 38.8977
+Longitude: -77.0365
+Altitude: 15
 ```
 
 The program `predict` is used by the automated scripts to predict weather satellite orbits. Run `predict` to bring up the main menu. Select option ‘G’ from the menu to set your ground station location.
 
-You can enter whatever you want for the callsign (I used my amateur radio callsign). When entering the longitude, note that positive numbers are for the western hemisphere and negative numbers are for the eastern hemisphere. This is opposite convention, so make sure you get this right or you’ll be listening when there’s no satellite overhead!
+You can enter whatever you want for the callsign such as your amateur radio callsign. **When entering the longitude, note that positive numbers are for the western hemisphere and negative numbers are for the eastern hemisphere.** This is opposite convention, so make sure you get this right or you’ll be listening when there’s no satellite overhead!
 
 #### Get the Automation Scripts and Configure
 
-I’ve completely refactored the scripts originally posted in the Instructables article and added Node.js scripts for creating thumbnail images and uploading all images to S3. The git repo can be cloned anywhere on your Raspberry Pi. The `configure.sh` script sets the installation directory in the scripts and schedules a cron job to run the satellite pass scheduler job at midnight every night.
+The following scripts will automate the thumbnail images and then upload all images to S3. The git repo can be cloned anywhere on your Raspberry Pi. The `configure.sh` script sets the installation directory in the scripts and schedules a cron job to run the satellite pass scheduler job at midnight every night. The scheduler identifies times when each satellite will pass overhead and create an `at` one time job to start the recording, processing, and upload steps.
 
 ```
-git clone https://github.com/nootropicdesign/wx-ground-station.git
+git clone https://github.com/alonsovargas3/wx-ground-station.git
 cd wx-ground-station
 sh configure.sh
 cd aws-s3
 npm install
 ```
 
-In the file `aws-s3/upload-wx-images.js` set REGION, BUCKET, and LOCATION to the correct values. This Node.js script prepares the images for upload by creating thumbnail images, printing some metadata on the images, and creating a JSON metadata file for each image capture. The LOCATION string will be printed on the images that you capture. Here are my values just for reference.
+In the file `aws-s3/upload-wx-images.js` set REGION, BUCKET, and LOCATION to the correct values. The Node.js script prepares the images for upload by creating thumbnail images, printing some metadata on the images, and creating a JSON metadata file for each image capture. The LOCATION string will be printed on the images that you capture. Here are my values just for reference; you'll need to replace the long and lat if you want that included.
 
 ```
-var REGION = "us-west-2";
+var REGION = "us-west-1";
 var BUCKET = "wximages";
-var LOCATION = "weather ground station, city, state, USA  [long,lat]";
+var LOCATION = "K6KZO weather ground station, Austin, Texas, USA  [long,lat]";
 ```
 
-Also set the REGION and BUCKET correctly in the files aws-s3/upload-upcoming-passes.js and aws-s3/remove-wx-images.js. Plug in your own values:
+Also set the REGION and BUCKET correctly in the files `aws-s3/upload-upcoming-passes.js` and `aws-s3/remove-wx-images.js`. Here are my values for reference; make sure to update to reflect your configuration:
 
 ```
-var REGION = "us-west-2";
+var REGION = "us-west-1";
 var BUCKET = "wximages";
 ```
 
-Now we need to make some changes to the web content. The web interface uses Mapbox to draw the live maps of the next upcoming satellite pass. You’ll need to create an account at [Mapbox](https://mapbox.com/) to get an access token. Their free tier lets you load 50,000 maps/month, so you are not likely to have any real costs. When logged into Mapbox, get your account token from [https://account.mapbox.com/](https://account.mapbox.com/).
+Next you will need to make some changes to the web content. The web interface uses Mapbox to draw the live maps of the next upcoming satellite pass. You’ll need to create an account at [Mapbox](https://mapbox.com/) to get an access token. Their free tier lets you load 50,000 maps/month, so you are not likely to have any real costs. When logged into Mapbox, get your account token from [https://account.mapbox.com/](https://account.mapbox.com/).
 
-Now in the file `website/wx-ground-station.js`, set your bucket name, AWS region, AWS credentials (the Cognito identity pool info you saved above), Mapbox token, and your ground station info. Some of my values are shown here for reference.
+Next, in the file `website/wx-ground-station.js`, set your bucket name, AWS region, AWS credentials (the Cognito identity pool info you saved above), Mapbox token, and your ground station info. Some of my values are shown here for reference.
 
 ```
-var bucketName = 'nootropicdesign.wx';
-AWS.config.region = 'us-west-2'; // Region
+var bucketName = 'wximages';
+AWS.config.region = 'us-west-1'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-    IdentityPoolId: 'us-west-2:1d02ae39-30a6-497e-b066-795f070de089'
+    IdentityPoolId: 'us-west-1:1d02ae39-30a6-497e-b066-795f070de089'
 });
 
 // Create a mapbox.com account and get access token
 const MAP_BOX_ACCESS_TOKEN = 'YOUR_MAPBOX_TOKEN';
-const GROUND_STATION_LAT =  45.0468;
-const GROUND_STATION_LON = -93.4747;
-const GROUND_STATION_NAME = 'my ground station';
+const GROUND_STATION_LAT =  38.8977;
+const GROUND_STATION_LON = -77.0365;
+const GROUND_STATION_NAME = 'K6KZO ground station';
 ```
 
 #### Upload the Web Content to S3
@@ -280,16 +280,16 @@ Even though you don’t have any images captured, you should be able to see the 
 
 The `wxtoimg` enhancements that are displayed depends on what sensors were active when the images were captured. If sensors 3 and 4 were active (usually at night), then the thermal enhancement will be shown. Otherwise a multispectral analysis enhancement will be shown.
 
-Not all images you capture will be good. I feel lucky if even half of my satellite passes produce recognizable images. You can clean up bad ones by using the script `aws-s3/remove-wx-images` on the Raspberry Pi. Just provide the key to the particular capture as an argument to remove all the images and the metadata from the S3 bucket.
+Not all images you capture will be good; the satellite may be too low or you may not get a good signal. You can clean up bad ones by using the script `aws-s3/remove-wx-images` on the Raspberry Pi. Just provide the key to the particular capture as an argument to remove all the images and the metadata from the S3 bucket.
 
 ```
 node aws-s3/remove-wx-images NOAA19-20191108-162650
 ```
 
-Hopefully in the next few hours you’ll be able to see some images uploaded, depending on when satellites are scheduled to fly over. You may get up to 12 passes per day, usually 2 for each of the NOAA satellites in the morning, then 2 more for each of them in the evening. Let us know if this project worked for you!
+In the next few hours you’ll be able to see some images uploaded, depending on when satellites are scheduled to fly over. You may get up to 12 passes per day, usually 2 for each of the NOAA satellites in the morning, then 2 more for each of them in the evening.
 
 ### Fine Tuning
 
-The script `receive_and_process_satellite.sh` uses the `rtl_fm` command to read the signal from the RTL-SDR receiver. The -p argument sets the PPM error correction. I have mine set to 0, but you may want to adjust. See [this](https://davidnelson.me/?p=371) article for details.
+The script `receive_and_process_satellite.sh` uses the `rtl_fm` command to read the signal from the RTL-SDR receiver. The -p argument sets the PPM error correction. Most of the time it is set to 0, but you may want to adjust. See [this](https://davidnelson.me/?p=371) article for details.
 
-I have also installed a low noise amplifier (LNA) to improve my reception (results are mixed). My LNA can be powered with a bias tee circuit and controlled with the `rtl_biast` command. If you are using an LNA like this, you can install rtl_biast as documented [here](https://www.rtl-sdr.com/rtl-sdr-blog-v-3-dongles-user-guide/) and uncomment the `rtl_biast` lines in `receive_and_process_satellite.sh` which turn the LNA on and off.
+You can also install a low noise amplifier (LNA) to improve reception (results are mixed). Some LNAs can be powered with a bias tee circuit and controlled with the `rtl_biast` command. If you are using an LNA like this, you can install rtl_biast as documented [here](https://www.rtl-sdr.com/rtl-sdr-blog-v-3-dongles-user-guide/) and uncomment the `rtl_biast` lines in `receive_and_process_satellite.sh` which turn the LNA on and off.
