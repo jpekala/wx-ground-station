@@ -1,5 +1,7 @@
 # Automated Weather Satellite Ground Station
 
+![Example Weather Capture](documentation/example-mcir-precip.png "MCIR with Precipitation")
+
 ## Introduction
 
 This project allows you to create a fully automated ground station that will receive and decode NOAA weather satellite images and upload them to your own website served from an Amazon AWS S3 bucket. [See my example S3 site](https://wximages.s3-us-west-1.amazonaws.com/index.html).
