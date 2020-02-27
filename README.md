@@ -294,4 +294,25 @@ In the next few hours you’ll be able to see some images uploaded, depending on
 
 The script `receive_and_process_satellite.sh` uses the `rtl_fm` command to read the signal from the RTL-SDR receiver. The -p argument sets the PPM error correction. Most of the time it is set to 0, but you may want to adjust. See [this](https://davidnelson.me/?p=371) article for details.
 
-You can also install a low noise amplifier (LNA) to improve reception (results are mixed). Some LNAs can be powered with a bias tee circuit and controlled with the `rtl_biast` command. If you are using an LNA like this, you can install rtl_biast as documented [here](https://www.rtl-sdr.com/rtl-sdr-blog-v-3-dongles-user-guide/). Once installed, uncomment the `rtl_biast` lines toward the top of `receive_and_process_satellite.sh`. This will turn the LNA on right before starting to record and off after capturing the signal. **Make sure that you also update the path if you have installed `rtl_biast` in a different location**
+### Low Noise Amplifier
+
+You can also install a low noise amplifier (LNA) to improve reception (results are mixed). Some LNAs can be powered with a bias tee circuit and controlled with the `rtl_biast` command.
+
+In Linux or MacOS download the source from git, compile it the same way you do the regular RTL-SDR drivers, and then run ./rtl_biast -b 1 to turn the bias tee on and ./rtl_biast -b 0 to turn the bias tee off. The procedure is:
+
+```
+git clone https://github.com/rtlsdrblog/rtl-sdr-blog
+cd rtl-sdr-blog
+mkdir build
+cd build
+cmake .. -DDETACH_KERNEL_DRIVER=ON
+make
+cd src
+./rtl_biast -b 1
+```
+
+If you want to be able to run the bias tee program from anywhere on the command line you can also run "sudo make install".
+
+If you have trouble running the bias tee check with a multimeter if there is 4.5V at the SMA port. Also check that your powered device is actually capable of receiving power. Remember that not all LNA's can accept bias tee power. We recommend Adam 9A4QV's LNA4ALL, as you can order this from his store with the bias tee power option enabled. If you need further help please contact us at admin@rtl-sdr.com.
+
+Once installed, uncomment the `rtl_biast` lines toward the top of `receive_and_process_satellite.sh`. This will turn the LNA on right before starting to record and off after capturing the signal. **Make sure that you also update the path if you have installed `rtl_biast` in a different location**
