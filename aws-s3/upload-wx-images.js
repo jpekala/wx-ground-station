@@ -7,11 +7,17 @@ var uuid = require('uuid');
 var Jimp = require('jimp');
 var dateFormat = require('dateformat');
 
-//AWS Configuration
+// AWS Configuration
 var REGION = "";
 var BUCKET = "";
+
+// Title information printed over image
 var LOCATION = "";
+
+// Working directories for data
 var IMAGE_DIR = "images/";
+var LOG_DIR = "logs/";
+var AUDIO_DIR = "audio/";
 
 // Set region
 AWS.config.update({region: REGION});
@@ -35,6 +41,8 @@ var chan_b = process.argv[12];
 var basename = filebase.slice(filebase.lastIndexOf('/')+1);
 // Get the directory name
 var dirname = filebase.slice(0, filebase.lastIndexOf('/')+1);
+// Get the root directory without images directory
+var rootdirname  = filebase.slice(0, filebase.lastIndexOf('/') - 6);
 // Get individual parts of the base name (such as NOAA15, 20200227, and 141322)
 var components = basename.split("-");
 // Get date as the second part of the array and format as YYYY-MM-DD
@@ -163,12 +171,14 @@ async function uploadImage(image, filename) {
     });
   });
 
-  // Return image information that was uploaded 
+  // Return image information that was uploaded
   return imageInfo;
 }
 
 // Function to upload JSON file with all of the pass metadata
 function uploadMetadata(filebase) {
+
+  // Upload JSON
   // Define name for the JSON file that contains all the metadata
   var metadataFilename = filebase + ".json";
   console.log("uploading metadata " + JSON.stringify(metadata, null, 2));
@@ -179,20 +189,51 @@ function uploadMetadata(filebase) {
     Key: IMAGE_DIR + metadataFilename,
     Body: JSON.stringify(metadata, null, 2)
   };
-  // Upload file to S3
-  s3.putObject(params, function(err, data) {
-    if (err) {
-      console.log(err)
-    } else {
-      console.log("  successfully uploaded metadata " + metadataFilename);
-    }
-  });
+  uploadS3(params);
+
+  //Upload Audio
+  var audioFilename = filebase + ".wav";
+  var audioContent = fs.readFileSync(rootdirname + "audio/" + audioFilename);
+  console.log("uploading audio file " + audioFilename);
+  var audioParams = {
+    ACL: "public-read",
+    Bucket: BUCKET,
+    Key: AUDIO_DIR + audioFilename,
+    Body: audioContent
+  };
+  uploadS3(audioParams);
+
+  //Upload Logs
+  var logFilename = filebase + ".log";
+  var logContent = fs.readFileSync(rootdirname + "logs/" + logFilename);
+  console.log("uploading log file " + logFilename);
+  var logParams = {
+    ACL: "public-read",
+    Bucket: BUCKET,
+    Key: LOG_DIR + logFilename,
+    Body: logContent
+  };
+  uploadS3(logParams);
+
+  // Function to upload file to S3
+  function uploadS3(params){
+    s3.putObject(params, function(err, data) {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log("  successfully uploaded metadata ");
+      }
+    });
+  }
+
 }
 
 // Find all the files that match the filebase plus a wildcard of
 // capital letters followed by any character and a png extension
 // such as /home/pi/wx-ground-station/images/NOAA15-20200227-141322-MCIR.png
-glob(filebase + "-[A-Z]*.png", {}, function (err, files) {
+// glob(filebase + "-[A-Z]*.png", {}, function (err, files) { //<- Old version
+glob(filebase + "-*.png", {}, function (err, files) {
+  console.log(filebase);
   //Create an array to upload files and store promise
   var uploadPromises = [];
   //Iterate through each file
