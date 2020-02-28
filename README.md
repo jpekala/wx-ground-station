@@ -1,4 +1,4 @@
-# NOAA Automated Weather Satellite Ground Station
+# Automated NOAA Weather Satellite Ground Station
 
 ![Example Weather Capture](documentation/example-mcir-precip.png "MCIR with Precipitation")
 
