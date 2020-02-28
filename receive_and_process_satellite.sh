@@ -40,6 +40,8 @@ if [ -e $AUDIO_FILE ]
 
     /usr/local/bin/wxtoimg -m ${MAP_FILE} -e therm $AUDIO_FILE ${IMAGE_DIR}/${FILEKEY}-THERM.png >> $LOGFILE 2>&1
 
+    /usr/local/bin/wxtoimg p $AUDIO_FILE ${IMAGE_DIR}/${FILEKEY}-PRISTINE.png >> $LOGFILE 2>&1
+
     TLE1=`grep "$SAT" $TLE_FILE -A 2 | tail -2 | head -1 | tr -d '\r'`
     TLE2=`grep "$SAT" $TLE_FILE -A 2 | tail -2 | tail -1 | tr -d '\r'`
     GAIN=`grep Gain $LOGFILE | head -1`

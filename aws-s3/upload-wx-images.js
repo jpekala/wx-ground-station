@@ -18,6 +18,7 @@ var LOCATION = "";
 var IMAGE_DIR = "images/";
 var LOG_DIR = "logs/";
 var AUDIO_DIR = "audio/";
+var MAP_DIR = "maps/"
 
 // Set region
 AWS.config.update({region: REGION});
@@ -103,6 +104,7 @@ async function uploadImage(image, filename) {
   if (filename.endsWith("-MCIR-precip.png")) enhancement = "multispectral precip";
   if (filename.endsWith("-MCIR.png")) enhancement = "map color infrared with precip";
   if (filename.endsWith("-THERM.png")) enhancement = "thermal";
+  if (filename.endsWith("-PRISTINE.png")) enhancement = "pristine view";
 
   // Define imageInfo variable with details of the image
   var imageInfo = {
@@ -191,6 +193,19 @@ function uploadMetadata(filebase) {
   };
   uploadS3(params);
 
+  //Upload map
+  var mapFilename = filebase + "-map.png";
+  var mapContent = fs.readFileSync(rootdirname + "images/" + mapFilename);
+  console.log("uploading map file " + mapFilename);
+  var mapParams = {
+    ACL: "public-read",
+    ContentType: "image/png",
+    Bucket: BUCKET,
+    Key: MAP_DIR + mapFilename,
+    Body: mapContent
+  };
+  uploadS3(mapParams);
+
   //Upload Audio
   var audioFilename = filebase + ".wav";
   var audioContent = fs.readFileSync(rootdirname + "audio/" + audioFilename);
@@ -228,11 +243,11 @@ function uploadMetadata(filebase) {
 
 }
 
-// Find all the files that match the filebase plus a wildcard of
-// capital letters followed by any character and a png extension
-// such as /home/pi/wx-ground-station/images/NOAA15-20200227-141322-MCIR.png
-// glob(filebase + "-[A-Z]*.png", {}, function (err, files) { //<- Old version
-glob(filebase + "-*.png", {}, function (err, files) {
+// Find all the files that match the filebase plus a wildcard of capital
+// letters followed by any character and a png extension such as
+// /home/pi/wx-ground-station/images/NOAA15-20200227-141322-MCIR.png
+// this will leave out map file as it is handled in the metadata upload
+glob(filebase + "-[A-Z]*.png", {}, function (err, files) { //<- Old version
   console.log(filebase);
   //Create an array to upload files and store promise
   var uploadPromises = [];
