@@ -7,7 +7,7 @@ var bucketName = '';
 // Cognito -- Manage Identity Pools -- [identity_pool_name] -- Sample Code -- JavaScript
 //
 // Initialize the Amazon Cognito credentials provider
-AWS.config.region = 'us-west-2'; // Region
+AWS.config.region = ''; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
     IdentityPoolId: ''
 });
