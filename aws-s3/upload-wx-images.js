@@ -115,18 +115,24 @@ async function uploadImage(image, filename) {
     enhancement: enhancement
   };
 
-  // Upload images
+  // Upload image
   // Load font included in Jimp
   var font = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
   // Create a new image with width, height, and image background
   var newImage = await new Jimp(image.bitmap.width, image.bitmap.height+64, '#000000');
-  // Composites another Jimp image over image at x, y
-  newImage.composite(image, 0, 48);
-  image = newImage;
-  // Print image details and location at the top of the image
-  image.print(font, 5, 5, metadata.date + " " + metadata.time + "  satellite: " + metadata.satellite +
-    "  elevation: " + metadata.elevation + '\xB0' + "  enhancement: " + enhancement);
-  image.print(font, 5, 25, LOCATION);
+  if (filename.endsWith("-PRISTINE.png")){
+    newImage.composite(image, 0, 0);
+    image = newImage;
+  } else{
+    // Composites another Jimp image over image at x, y
+    newImage.composite(image, 0, 48);
+    image = newImage;
+    // Print image details and location at the top of the image
+    image.print(font, 5, 5, metadata.date + " " + metadata.time + "  satellite: " + metadata.satellite +
+      "  elevation: " + metadata.elevation + '\xB0' + "  enhancement: " + enhancement);
+    image.print(font, 5, 25, LOCATION);
+  }
+
   // Put image in buffer to upload
   image.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
     // Parameters needed to upload file to S3
