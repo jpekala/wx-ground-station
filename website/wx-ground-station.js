@@ -26,10 +26,13 @@ var s3 = new AWS.S3({
   params: {Bucket: bucketName}
 });
 
+// Load new instance of TLE.js
 var tlejs = new TLEJS();
 var lastPositionOfNextPass;
 var nextPass = null
 
+// Get SATCAT number for satellite and
+// return s n2yo link for the satellite
 function getSatelliteLink(tles) {
   var satNum = tlejs.getSatelliteNumber(tles);
   return "https://www.n2yo.com/satellite/?s=" + satNum;
@@ -55,6 +58,12 @@ function load() {
 
     var captureCount = 0;
 
+    function convertToLocal(date,time){
+      var epoch = new Date(date + " " + time + " GMT");
+      var locTime = new Date(epoch);
+      return locTime.toLocaleString()
+    }
+
     sortedMeta.forEach(function (m) {
       if (++captureCount > MAX_CAPTURES) return;
       if (m == null) return;
@@ -62,7 +71,8 @@ function load() {
       var satLink = '<a target="_blank" href="' + getSatelliteLink([m.tle1, m.tle2]) + '">' + m.satellite + '</a>';
       $('#previous_passes').append([
         //'<br clear="all"/>',
-        '<h3 class="mt-1">', m.date, '  ', m.time, '</h3>',
+        '<h3 class="mt-1">', convertToLocal(m.date,m.time), '</h3>',
+        '<p>', m.date, '  ', m.time, '<p>',
         '<div class="row" style="margin-left:0px;">',
           '<div id=', mapId, ' style="height: 240px;" class="col-lg-6 col-md-6 col-xs-8">',
           '</div>',
@@ -229,20 +239,29 @@ function getImageMetadata(DIR_NAME, cb) {
   });
 }
 
+// Gets all upcoming satellite passes for the given LAT / LONG
 function getUpcomingPassInfo() {
 
+  // Load upcoming_passes.json file using a HTTP GET request
   $.get(DIR_NAME + "/upcoming_passes.json", function(data) {
     var now = new Date();
-    var processingTime = 240000; // approx 3 minutes to process and upload images.
+    var processingTime = 240000; // approx 4 minutes to process and upload images.
+    // Loop through all upcoming passes to find next pass by looking at the end
+    // time of each pass  and determining if it is later than the  current time
+    // Note - upcoming passes file is in order of time and is loaded the same way
+    // Note2 - using end time ensures next pass will not show until current is complete
     for(var i=0;i<data.length;i++) {
       var passTime = new Date(data[i].end + processingTime);
       if ((!nextPass) && (passTime > now)) {
         nextPass = data[i];
       }
     }
+    // Link to satellite for next pass
     var satLink = '<a target="_blank" href="' + getSatelliteLink([nextPass.tle1, nextPass.tle2]) + '">' + nextPass.satellite + '</a>';
+    // Start and end time for next pass
     var startDate = new Date(nextPass.start);
     var endDate = new Date(nextPass.end + processingTime);
+    // Populates upcoming_passes <div> with next pass information
     $("#upcoming_passes").append([
       '<div>',
       '<h5>next image capture: ',
@@ -262,10 +281,11 @@ function getUpcomingPassInfo() {
       '</div>'].join('')
     );
 
+    // Get location of satellite for next pass for the current time
     lastPositionOfNextPass = tlejs.getLatLon([nextPass.tle1, nextPass.tle2], new Date().getTime());
-
+    // Set mabox access token for Mapbox GL
     mapboxgl.accessToken = MAP_BOX_ACCESS_TOKEN;
-
+    // Intializes a new flyover map
     var flyoverMap = new mapboxgl.Map({
       container: 'flyover_map',
       style: 'mapbox://styles/mapbox/satellite-streets-v10',
@@ -274,19 +294,21 @@ function getUpcomingPassInfo() {
       bearing: 0,
       zoom: 3
     });
-
+    // Initializes a new static map
     var staticMap = new mapboxgl.Map({
       container: 'static_map',
       style: 'mapbox://styles/mapbox/streets-v11',
       center: [0, 0],
       zoom: 0
     });
-
+    // Get satelite location for current time and return
+    // Mapbox GL object with LAT / LON for static map
     function getSatLocation() {
       var location = tlejs.getLatLon([nextPass.tle1, nextPass.tle2], new Date().getTime());
       return new mapboxgl.LngLat(location.lng, location.lat);
     }
-
+    // Get satellite location for current time
+    // and return flyover map coordinate
     function getSatLocationPoint() {
       var l = getSatLocation();
       return {
@@ -358,7 +380,6 @@ function getUpcomingPassInfo() {
     });
 
 
-
     staticMap.on('load', function() {
       staticMap.addSource('satellite-location', {
         "type": "geojson",
@@ -412,6 +433,7 @@ function getUpcomingPassInfo() {
         }
       });
 
+      // Moves static map to center of satellite when function is called
       staticMap.flyTo({
         center: [
           getSatLocationPoint().coordinates[0],
@@ -419,6 +441,7 @@ function getUpcomingPassInfo() {
         ],
       });
 
+      // Move static map to center of satellite every 25 seconds
       setInterval(() => {
         staticMap.flyTo({
           center: [
@@ -428,12 +451,13 @@ function getUpcomingPassInfo() {
         });
       }, 25000);
 
+      // Finds satellite location for a given time every half second
       setInterval(() => {
         staticMap.getSource('satellite-location').setData(getSatLocationPoint());
       }, 500);
 
+      // Finds satellite orbit and sets it every minute
       setInterval(() => {
-        // set the current orbit every minute.
         staticMap.getSource('current-orbit').setData(getOrbitData());
       }, 60000);
 
