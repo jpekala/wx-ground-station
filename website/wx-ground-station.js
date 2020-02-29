@@ -85,7 +85,7 @@ function load() {
             '<div>gain: ', m.gain, '</div>',
             '<div>channel A: ', m.chan_a, '</div>',
             '<div>channel B: ', m.chan_b, '</div>',
-            '<div><a href=\"images/'+m.imageKey+'-PRISTINE.png\">pristine</a> | <a href=\"maps/'+m.imageKey+'-map.png\">map</a> | <a href=\"audio/'+m.imageKey+'.wav\">audio</a></div>',
+            '<div><a target=\"_blank\" href=\"images/'+m.imageKey+'-PRISTINE.png\">pristine</a> | <a target=\"_blank\" href=\"maps/'+m.imageKey+'-map.png\">map</a> | <a target=\"_blank\" href=\"audio/'+m.imageKey+'.wav\">audio</a></div>',
           '</div>',
         '</div>'].join(''));
       $('#previous_passes').append([
