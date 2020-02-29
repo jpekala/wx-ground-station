@@ -2,7 +2,7 @@
 //
 // Replace BUCKET_NAME with the bucket name.
 //
-var bucketName = '';
+var bucketName = 'wximages';
 // Replace this block of code with the sample code located at:
 // Cognito -- Manage Identity Pools -- [identity_pool_name] -- Sample Code -- JavaScript
 //
@@ -65,6 +65,7 @@ function load() {
     }
 
     sortedMeta.forEach(function (m) {
+      console.log(JSON.stringify(m));
       if (++captureCount > MAX_CAPTURES) return;
       if (m == null) return;
       var mapId = m.imageKey + '-gt';
@@ -84,6 +85,7 @@ function load() {
             '<div>gain: ', m.gain, '</div>',
             '<div>channel A: ', m.chan_a, '</div>',
             '<div>channel B: ', m.chan_b, '</div>',
+            '<div><a href=\"images/'+m.imageKey+'-PRISTINE.png\">pristine</a> | <a href=\"maps/'+m.imageKey+'-map.png\">map</a> | <a href=\"audio/'+m.imageKey+'.wav\">audio</a></div>',
           '</div>',
         '</div>'].join(''));
       $('#previous_passes').append([
@@ -161,11 +163,12 @@ function load() {
 
       m.images.forEach(function (i) {
         if (i.filename.endsWith("-ZA.png")) i.order = 1;
-        if (i.filename.endsWith("-MCIR.png")) i.order = 2;
-        if (i.filename.endsWith("-NO.png")) i.order = 3;
-        if (i.filename.endsWith("-MSA.png")) i.order = 4;
-        if (i.filename.endsWith("-MSAPRECIP.png")) i.order = 5;
-        if (i.filename.endsWith("-THERM.png")) i.order = 6;
+        if (i.filename.endsWith("-MCIR-precip.png")) i.order = 2;
+        if (i.filename.endsWith("-MCIR.png")) i.order = 3;
+        if (i.filename.endsWith("-NO.png")) i.order = 4;
+        if (i.filename.endsWith("-MSA.png")) i.order = 5;
+        if (i.filename.endsWith("-MSAPRECIP.png")) i.order = 6;
+        if (i.filename.endsWith("-THERM.png")) i.order = 7;
       });
       var images = m.images.sort(function (i1, i2) {
         return (i1.order < i2.order) ? -1 : 1;
@@ -191,15 +194,18 @@ function load() {
         }
         var url = DIR_NAME + '/' + i.filename;
         var thumburl = DIR_NAME + '/' + i.thumbfilename;
-        imageHtml.push([
-          '<figure class="col-lg-3 col-md-6 col-xs-6">',
-            '<a target="_blank" rel="group" href="', url, '" data-width="', i.width, '" data-height="', i.height, '" data-toggle="lightbox" data-type="image">',
-              '<img class="img-fluid img-responsive" src="', thumburl, '" alt="">',
-            '</a>',
-            '<div class="caption">',
-              i.enhancement,
-            '</div>',
-          '</figure>'].join(''));
+        if(!i.filename.endsWith("-PRISTINE.png")){
+          imageHtml.push([
+            '<figure class="col-lg-3 col-md-6 col-xs-6">',
+              '<a target="_blank" rel="group" href="', url, '" data-width="', i.width, '" data-height="', i.height, '" data-toggle="lightbox" data-type="image">',
+                '<img class="img-fluid img-responsive" src="', thumburl, '" alt="">',
+              '</a>',
+              '<div class="caption">',
+                i.enhancement,
+              '</div>',
+            '</figure>'].join(''));
+        }
+
       });
       imageHtml.push('</div>');
       $('#previous_passes').append(imageHtml.join(''));
