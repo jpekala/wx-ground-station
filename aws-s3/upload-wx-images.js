@@ -123,6 +123,7 @@ async function uploadImage(image, filename) {
   if (filename.endsWith("-PRISTINE.png")){
     newImage.composite(image, 0, 0);
     image = newImage;
+    console.log(filename + " image created (pristine)");
   } else{
     // Composites another Jimp image over image at x, y
     newImage.composite(image, 0, 48);
@@ -131,6 +132,7 @@ async function uploadImage(image, filename) {
     image.print(font, 5, 5, metadata.date + " " + metadata.time + "  satellite: " + metadata.satellite +
       "  elevation: " + metadata.elevation + '\xB0' + "  enhancement: " + enhancement);
     image.print(font, 5, 25, LOCATION);
+    console.log(filename + " image created");
   }
 
   // Put image in buffer to upload
@@ -197,7 +199,7 @@ function uploadMetadata(filebase) {
     Key: IMAGE_DIR + metadataFilename,
     Body: JSON.stringify(metadata, null, 2)
   };
-  uploadS3(params);
+  uploadS3(params,metadataFilename);
 
   //Upload map
   var mapFilename = filebase + "-map.png";
@@ -210,7 +212,7 @@ function uploadMetadata(filebase) {
     Key: MAP_DIR + mapFilename,
     Body: mapContent
   };
-  uploadS3(mapParams);
+  uploadS3(mapParams,mapFilename);
 
   //Upload Audio
   var audioFilename = filebase + ".wav";
@@ -222,7 +224,7 @@ function uploadMetadata(filebase) {
     Key: AUDIO_DIR + audioFilename,
     Body: audioContent
   };
-  uploadS3(audioParams);
+  uploadS3(audioParams,audioFilename);
 
   //Upload Logs
   var logFilename = filebase + ".log";
@@ -234,15 +236,15 @@ function uploadMetadata(filebase) {
     Key: LOG_DIR + logFilename,
     Body: logContent
   };
-  uploadS3(logParams);
+  uploadS3(logParams,logFilename);
 
   // Function to upload file to S3
-  function uploadS3(params){
+  function uploadS3(params,fileName){
     s3.putObject(params, function(err, data) {
       if (err) {
         console.log(err)
       } else {
-        console.log("  successfully uploaded metadata ");
+        console.log("  successfully uploaded " + fileName);
       }
     });
   }
