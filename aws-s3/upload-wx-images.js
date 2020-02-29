@@ -101,8 +101,9 @@ async function uploadImage(image, filename) {
   if (filename.endsWith("-ZA.png")) enhancement = "normal infrared";
   if (filename.endsWith("-NO.png")) enhancement = "color infrared";
   if (filename.endsWith("-MSA.png")) enhancement = "multispectral analysis";
-  if (filename.endsWith("-MCIR-precip.png")) enhancement = "multispectral precip";
-  if (filename.endsWith("-MCIR.png")) enhancement = "map color infrared with precip";
+  if (filename.endsWith("-MSA-precip.png")) enhancement = "multispectral precip";
+  if (filename.endsWith("-MCIR.png")) enhancement = "map color infrared";
+  if (filename.endsWith("-MCIR-precip.png")) enhancement = "map color infrared precip";
   if (filename.endsWith("-THERM.png")) enhancement = "thermal";
   if (filename.endsWith("-PRISTINE.png")) enhancement = "pristine view";
 
