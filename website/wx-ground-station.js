@@ -17,7 +17,7 @@ const MAP_BOX_ACCESS_TOKEN = 'YOUR MAPBOX TOKEN';
 const GROUND_STATION_LAT =  45.0468;
 const GROUND_STATION_LON = -93.4747;
 const GROUND_STATION_NAME = 'my ground station';
-const MAX_CAPTURES = 20;
+const MAX_CAPTURES = 10;
 const DIR_NAME = "images";
 
 // Create a new service object
@@ -59,9 +59,9 @@ function load() {
     var captureCount = 0;
 
     function convertToLocal(date,time){
-      var epoch = new Date(date + " " + time + " GMT");
-      var locTime = new Date(epoch);
-      return locTime.toLocaleString()
+      var combinedDate = date + " " + time.replace(" +0000","");
+      var local = moment.utc(combinedDate).local().format('YYYY-MM-DD HH:mm:ss');
+      return local;
     }
 
     sortedMeta.forEach(function (m) {
