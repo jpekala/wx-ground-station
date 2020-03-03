@@ -2,6 +2,24 @@
 <html>
   <head>
     <title>weather satellite ground station</title>
+    <!-- Favicon Stuff -->
+    <link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
     <!-- Moment.js -->
     <script src="moment.js"></script>
     <!--   Replace SDK_VERSION_NUMBER with the current SDK version number -->
@@ -22,7 +40,7 @@
       color: #000000;
     }
     .logo {
-      width: 300px;
+      width: 150px;
     }
     #static_map {
       height: 320px;
@@ -35,19 +53,46 @@
     }
     #location {
       margin-top: 0px;
+      color: #f00100;
     }
     </style>
 
   </head>
   <body>
-    <div style="font-size: 0.9rem; font-family: Menlo,Monaco,Consolas,Courier New,monospace;" class="container">
-      <div class="mt-5 mb-5">
-        <a href=""><img src="logo.png" class="logo"/></a>
-        <h4>weather satellite ground station</h4>
-        <h4 id="location"></h4>
-        <hr>
-        <div style="font-size:12px"><a target="_blank" href="https://github.com/alonsovargas3/wx-ground-station">Setup Your Own Ground Station</a></div>
+
+    <!-- Navbar -->
+    <div style="font-size: 0.9rem; font-family: Menlo,Monaco,Consolas,Courier New,monospace; margin-bottom: 0px" class="container">
+      <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="#"></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ml-auto">
+              <a class="nav-link" href="#" data-toggle="modal" data-target="#exampleModalLong">Pass Times</a>
+            </li>
+            <li class="nav-item ml-auto">
+              <a class="nav-link" target="_blank" href="https://github.com/alonsovargas3/wx-ground-station">Github</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Header -->
+      <div class="mb-5" style="border-bottom: 1px solid #CCCCCC;">
+        <img style="vertical-align: top" src="logo.png" class="logo"/>
+        <span class="navbar-text">
+          <h4>weather satellite ground station</h4>
+          <h6 id="location"></h6>
+          <p>Receiver: RTL-SDR
+          <br>Filter: SAWbird+ Filter & LNA / 137MHz center frequency
+          <br>Antenna: Quadrifilar Helix</p>
+        </span>
       </div>
+
+      <!-- Passes and Images -->
       <div id="upcoming_passes" class="mb-2">
       </div>
       <div id="maps" class="row col-lg-12 col-md-12 col-xs-12 mb-5">
@@ -59,6 +104,28 @@
       <div id="messages"></div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Passes</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="all_passes">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
     <script src="wx-ground-station.js"></script>
@@ -67,6 +134,7 @@
       $(document).ready(function () {
         load();
       });
-  </script>
+    </script>
+
   </body>
 </html>

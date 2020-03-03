@@ -1,4 +1,3 @@
-
 //
 // Replace BUCKET_NAME with the bucket name.
 //
@@ -17,7 +16,7 @@ const MAP_BOX_ACCESS_TOKEN = 'YOUR MAPBOX TOKEN';
 const GROUND_STATION_LAT =  45.0468;
 const GROUND_STATION_LON = -93.4747;
 const GROUND_STATION_NAME = 'my ground station';
-const MAX_CAPTURES = 10;
+const MAX_CAPTURES = 20;
 const DIR_NAME = "images";
 
 // Create a new service object
@@ -42,6 +41,7 @@ function getSatelliteLink(tles) {
 function load() {
   $('#location').html(GROUND_STATION_LAT + ', ' + GROUND_STATION_LON);
   getUpcomingPassInfo();
+  getAllUpcomingPasses();
   getImageMetadata(DIR_NAME, function (err, metadata) {
     if (err) {
       $('#messages').html('<div class="alert alert-danger" role="alert">Error getting image metadata: ' + err + '</div>');
@@ -65,7 +65,6 @@ function load() {
     }
 
     sortedMeta.forEach(function (m) {
-      console.log(JSON.stringify(m));
       if (++captureCount > MAX_CAPTURES) return;
       if (m == null) return;
       var mapId = m.imageKey + '-gt';
@@ -167,7 +166,7 @@ function load() {
         if (i.filename.endsWith("-MCIR.png")) i.order = 3;
         if (i.filename.endsWith("-NO.png")) i.order = 4;
         if (i.filename.endsWith("-MSA.png")) i.order = 5;
-        if (i.filename.endsWith("-MSAPRECIP.png")) i.order = 6;
+        if (i.filename.endsWith("-MSA-precip.png")) i.order = 6;
         if (i.filename.endsWith("-THERM.png")) i.order = 7;
       });
       var images = m.images.sort(function (i1, i2) {
@@ -177,12 +176,12 @@ function load() {
         '<div class="row mb-5">'
       ];
       images.forEach(function (i) {
-        if (i.filename.endsWith('-MSAPRECIP.png')) {
-          return;
-        }
         if (m.chan_a == '3/3B (mid infrared)') {
           // Show MSA image if sensor 3 was used.
           if (i.filename.endsWith('-MSA.png')) {
+            return;
+          }
+          if (i.filename.endsWith('-MSA-precip.png')) {
             return;
           }
         }
@@ -245,7 +244,42 @@ function getImageMetadata(DIR_NAME, cb) {
   });
 }
 
+// Get upcoming passes to show all passes
+function getAllUpcomingPasses() {
+  // Load upcoming_passes.json file using a HTTP GET request
+  $.get(DIR_NAME + "/upcoming_passes.json", function(data) {
+    // Loop through all upcoming passes to find next pass by looking at the end
+    // time of each pass  and determining if it is later than the  current time
+    // Note - upcoming passes file is in order of time and is loaded the same way
+    // Note2 - using end time ensures next pass will not show until current is complete
+    for(var i=0;i<data.length;i++) {
+      var passTime = new Date(data[i].end);
+      nextPass = data[i];
+      var startDate = new Date(nextPass.start);
+      var endDate = new Date(nextPass.end);
+      var satLink = '<a target="_blank" href="' + getSatelliteLink([nextPass.tle1, nextPass.tle2]) + '">' + nextPass.satellite + '</a>';
+      $("#all_passes").append([
+        '<div>',
+        satLink,
+        '<br>',
+        nextPass.direction,
+        ' at ',
+        nextPass.elevation,
+        '&deg elevation',
+        '<br>',
+        'capture begins at: ',
+        ("0" + startDate.getHours()).slice(-2) + ":" + ("0" + startDate.getMinutes()).slice(-2),
+        '<br>',
+        'imagery approx: ',
+        ("0" + endDate.getHours()).slice(-2) + ":" + ("0" + endDate.getMinutes()).slice(-2),
+        '</div>'].join('')
+      );
+    }
+  });
+}
+
 // Gets all upcoming satellite passes for the given LAT / LONG
+// This is used to display upcoming pass
 function getUpcomingPassInfo() {
 
   // Load upcoming_passes.json file using a HTTP GET request
