@@ -246,6 +246,7 @@ function getImageMetadata(DIR_NAME, cb) {
 
 // Get upcoming passes to show all passes
 function getAllUpcomingPasses() {
+  var now = new Date();
   // Load upcoming_passes.json file using a HTTP GET request
   $.get(DIR_NAME + "/upcoming_passes.json", function(data) {
     // Loop through all upcoming passes to find next pass by looking at the end
@@ -258,9 +259,21 @@ function getAllUpcomingPasses() {
       var startDate = new Date(nextPass.start);
       var endDate = new Date(nextPass.end);
       var satLink = '<a target="_blank" href="' + getSatelliteLink([nextPass.tle1, nextPass.tle2]) + '">' + nextPass.satellite + '</a>';
+      var curPass;
+
+      if ((!bgSet) && (endDate > now)) {
+        curPass = 'style=\"background-color: #EDEDED;\"';
+        var bgSet = 1;
+      } else {
+        curPass = '';
+      }
+
       $("#all_passes").append([
-        '<div>',
+        '<div ' + curPass + '>',
         satLink,
+        '<br>',
+        startDate.toDateString(),
+        '  ',
         '<br>',
         nextPass.direction,
         ' at ',
@@ -272,7 +285,7 @@ function getAllUpcomingPasses() {
         '<br>',
         'imagery approx: ',
         ("0" + endDate.getHours()).slice(-2) + ":" + ("0" + endDate.getMinutes()).slice(-2),
-        '</div>'].join('')
+        '</div><br>'].join('')
       );
     }
   });
