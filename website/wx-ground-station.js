@@ -1,7 +1,8 @@
+
 //
 // Replace BUCKET_NAME with the bucket name.
 //
-var bucketName = 'wximages';
+var bucketName = '';
 // Replace this block of code with the sample code located at:
 // Cognito -- Manage Identity Pools -- [identity_pool_name] -- Sample Code -- JavaScript
 //
@@ -12,11 +13,11 @@ AWS.config.credentials = new AWS.CognitoIdentityCredentials({
 });
 
 // Create a mapbox.com account and get access token
-const MAP_BOX_ACCESS_TOKEN = 'YOUR MAPBOX TOKEN';
-const GROUND_STATION_LAT =  45.0468;
-const GROUND_STATION_LON = -93.4747;
-const GROUND_STATION_NAME = 'my ground station';
-const MAX_CAPTURES = 20;
+const MAP_BOX_ACCESS_TOKEN = '';
+const GROUND_STATION_LAT =  '';
+const GROUND_STATION_LON = '';
+const GROUND_STATION_NAME = '';
+const MAX_CAPTURES = 10;
 const DIR_NAME = "images";
 
 // Create a new service object
@@ -74,9 +75,9 @@ function load() {
         '<h3 class="mt-1">', convertToLocal(m.date,m.time), '</h3>',
         '<p>', m.date, '  ', m.time, '<p>',
         '<div class="row" style="margin-left:0px;">',
-          '<div id=', mapId, ' style="height: 240px;" class="col-lg-6 col-md-6 col-xs-8">',
+          '<div id=', mapId, ' style="height: 240px;" class="col-lg-6 col-md-6 col-xs-11 col-11">',
           '</div>',
-          '<div style="margin-bottom:10px;" class="col-lg-6 col-md-6 col-xs-4">',
+          '<div style="margin-bottom:10px;" class="col-lg-6 col-md-6 col-xs-12 col-12">',
             '<div>satellite: ', satLink, '</div>',
             '<div>elevation: ', m.elevation, '&deg;', '</div>',
             '<div>direction: ', m.direction, '</div>',
@@ -88,11 +89,11 @@ function load() {
           '</div>',
         '</div>'].join(''));
       $('#previous_passes').append([
-        '<div class="row" style="margin-bottom: 8px;">',
-          '<div style="margin-bottom:10px;" class="col-lg-12 col-md-12 col-xs-12">',
+        '<div class="row" style="margin-bottom: 8px;" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">',
+          '<div style="margin-bottom:10px;" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">',
             '<div>orbital elements:</div>',
-            '<div>', m.tle1.replace(/ /g, "&nbsp;"), '</div>',
-            '<div>', m.tle2.replace(/ /g, "&nbsp;"), '</div>',
+            '<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">', m.tle1.replace(/ /g, " "), '</div>',
+            '<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">', m.tle2.replace(/ /g, " "), '</div>',
           '</div>',
         '</div>'].join(''));
 
@@ -195,7 +196,7 @@ function load() {
         var thumburl = DIR_NAME + '/' + i.thumbfilename;
         if(!i.filename.endsWith("-PRISTINE.png")){
           imageHtml.push([
-            '<figure class="col-lg-3 col-md-6 col-xs-6">',
+            '<figure class="col-lg-3 col-md-6 col-xs-6 col-6">',
               '<a target="_blank" rel="group" href="', url, '" data-width="', i.width, '" data-height="', i.height, '" data-toggle="lightbox" data-type="image">',
                 '<img class="img-fluid img-responsive" src="', thumburl, '" alt="">',
               '</a>',
