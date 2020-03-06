@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-module.exports = function(satDetails,passKey,passElevation,passDirection,){ //pair,status,exchange,found,price,indicator,timeFrame
+module.exports = function(satDetails,passKey,passElevation,passDirection,){ 
   var request = require("request");
 
   var webhook = process.env.DISCORD_WEBHOOK;
