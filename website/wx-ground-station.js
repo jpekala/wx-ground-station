@@ -247,7 +247,7 @@ function getImageMetadata(DIR_NAME, cb) {
 
 // Get upcoming passes to show all passes
 function getAllUpcomingPasses() {
-  var now = new Date();
+  var timeNow = new Date();
   // Load upcoming_passes.json file using a HTTP GET request
   $.get(DIR_NAME + "/upcoming_passes.json", function(data) {
     // Loop through all upcoming passes to find next pass by looking at the end
@@ -255,14 +255,13 @@ function getAllUpcomingPasses() {
     // Note - upcoming passes file is in order of time and is loaded the same way
     // Note2 - using end time ensures next pass will not show until current is complete
     for(var i=0;i<data.length;i++) {
-      var passTime = new Date(data[i].end);
-      nextPass = data[i];
-      var startDate = new Date(nextPass.start);
-      var endDate = new Date(nextPass.end);
-      var satLink = '<a target="_blank" href="' + getSatelliteLink([nextPass.tle1, nextPass.tle2]) + '">' + nextPass.satellite + '</a>';
+      var nextPassTime = data[i];
+      var passStartDate = new Date(nextPassTime.start);
+      var passEndDate = new Date(nextPassTime.end);
+      var passSatLink = '<a target="_blank" href="' + getSatelliteLink([nextPassTime.tle1, nextPassTime.tle2]) + '">' + nextPassTime.satellite + '</a>';
       var curPass;
 
-      if ((!bgSet) && (endDate > now)) {
+      if ((!bgSet) && (passEndDate > timeNow)) {
         curPass = 'style=\"background-color: #EDEDED;\"';
         var bgSet = 1;
       } else {
@@ -271,21 +270,21 @@ function getAllUpcomingPasses() {
 
       $("#all_passes").append([
         '<div ' + curPass + '>',
-        satLink,
+        passSatLink,
         '<br>',
-        startDate.toDateString(),
+        passStartDate.toDateString(),
         '  ',
         '<br>',
-        nextPass.direction,
+        nextPassTime.direction,
         ' at ',
-        nextPass.elevation,
+        nextPassTime.elevation,
         '&deg elevation',
         '<br>',
         'capture begins at: ',
-        ("0" + startDate.getHours()).slice(-2) + ":" + ("0" + startDate.getMinutes()).slice(-2),
+        ("0" + passStartDate.getHours()).slice(-2) + ":" + ("0" + passStartDate.getMinutes()).slice(-2),
         '<br>',
         'imagery approx: ',
-        ("0" + endDate.getHours()).slice(-2) + ":" + ("0" + endDate.getMinutes()).slice(-2),
+        ("0" + passEndDate.getHours()).slice(-2) + ":" + ("0" + passEndDate.getMinutes()).slice(-2),
         '</div><br>'].join('')
       );
     }
