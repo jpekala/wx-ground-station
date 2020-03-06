@@ -3,8 +3,8 @@ var path = require('path');
 var AWS = require('aws-sdk');
 var uuid = require('uuid');
 
-var REGION = "";
-var BUCKET = "";
+var REGION = process.env.AWS_REGION;
+var BUCKET = process.env.AWS_BUCKET;
 var IMAGE_DIR = "images/";
 
 AWS.config.update({region: REGION});

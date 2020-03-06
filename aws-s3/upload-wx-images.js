@@ -7,13 +7,14 @@ var AWS = require('aws-sdk');
 var uuid = require('uuid');
 var Jimp = require('jimp');
 var dateFormat = require('dateformat');
+var discord = require('./lib/api/discord');
 
 // AWS Configuration
-var REGION = "";
-var BUCKET = "";
+var REGION = process.env.AWS_REGION;
+var BUCKET = process.env.AWS_BUCKET;
 
 // Title information printed over image
-var LOCATION = "";
+var LOCATION = process.env.STATION_LOCATION;
 
 // Working directories for data
 var IMAGE_DIR = "images/";
@@ -266,6 +267,8 @@ glob(filebase + "-[A-Z]*.png", {}, function (err, files) { //<- Old version
     // Get the last part of the path returned by filename
     // Ensures we only get file name such as NOAA15-20200227-141322-MCIR.png
     var basename = path.basename(filename);
+    // Get key name of pass such as NOAA15-20200227-141322
+    var keyname = components[0] + "-" + components[1] + "-" + components[2];
     // Open the image file; using promise notation
     Jimp.read(filename)
       .then(image => {
@@ -282,6 +285,8 @@ glob(filebase + "-[A-Z]*.png", {}, function (err, files) { //<- Old version
             console.log("values: " + JSON.stringify(values, null, 2));
             // Call function to upload metadata to S3
             uploadMetadata(path.basename(filebase));
+            // Send Discord notification that the upload is complete
+            discord(satellite,keyname,elevation,direction);
           });
         }
       });
