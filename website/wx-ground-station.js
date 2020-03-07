@@ -1,4 +1,3 @@
-
 // Load new instance of TLE.js
 var tlejs = new TLEJS();
 var lastPositionOfNextPass;

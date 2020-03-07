@@ -1,3 +1,4 @@
+require('dotenv').config({path:'/home/pi/wx-ground-station/aws-s3/.env'});
 var fs =  require('fs');
 var path = require('path');
 var AWS = require('aws-sdk');
