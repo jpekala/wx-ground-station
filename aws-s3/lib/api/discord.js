@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-module.exports = function(satDetails,passKey,passElevation,passDirection,){ 
+module.exports = function(satDetails,passKey,passElevation,passDirection,){ //pair,status,exchange,found,price,indicator,timeFrame
   var request = require("request");
 
   var webhook = process.env.DISCORD_WEBHOOK;
@@ -9,7 +9,7 @@ module.exports = function(satDetails,passKey,passElevation,passDirection,){
   "\n" + satDetails +
   "\nelevation: "+passElevation+"°"+
   "\ndirection: "+passDirection+
-  "\n"+process.env.WEBSITE_ADDR+"/images/"+passKey+"-MCIR-precip.png";
+  "\n["+passKey+"]("+process.env.WEBSITE_ADDR+"/images/"+passKey+"-MCIR-precip.png \"NOAA19-20200307-002236\")";
   console.log(discordMsg);
 
   request.post(

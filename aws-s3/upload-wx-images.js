@@ -1,5 +1,5 @@
 // Required modules
-require('dotenv').config()
+require('dotenv').config({path:'/home/pi/wx-ground-station/aws-s3/.env'})
 var fs =  require('fs');
 var path = require('path');
 var glob = require("glob");
@@ -267,7 +267,6 @@ glob(filebase + "-[A-Z]*.png", {}, function (err, files) { //<- Old version
     // Get the last part of the path returned by filename
     // Ensures we only get file name such as NOAA15-20200227-141322-MCIR.png
     var basename = path.basename(filename);
-    // Get key name of pass such as NOAA15-20200227-141322
     var keyname = components[0] + "-" + components[1] + "-" + components[2];
     // Open the image file; using promise notation
     Jimp.read(filename)
@@ -285,7 +284,6 @@ glob(filebase + "-[A-Z]*.png", {}, function (err, files) { //<- Old version
             console.log("values: " + JSON.stringify(values, null, 2));
             // Call function to upload metadata to S3
             uploadMetadata(path.basename(filebase));
-            // Send Discord notification that the upload is complete
             discord(satellite,keyname,elevation,direction);
           });
         }
