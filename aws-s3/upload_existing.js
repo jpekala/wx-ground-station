@@ -48,10 +48,14 @@ s3.listObjects({Prefix: DIR_NAME}, function(err, data) {
           } else {
             var content = data.Body.toString();
             var db_content = JSON.parse(content);
+            db_content.passDate = db_content.date;
+            db_content.passTime = db_content.time;
+            delete db_content.date;
+            delete db_content.time;
             //console.log(db_content);
 
             var params = {
-              TableName: 'satellite-pass-list',
+              TableName: 'passes-dev',
               Item: db_content,
               ReturnConsumedCapacity: "TOTAL"
             };
