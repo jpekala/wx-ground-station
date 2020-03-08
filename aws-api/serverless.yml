@@ -1,0 +1,54 @@
+service: passes
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-west-2
+  environment:
+      PASS_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: "*"
+
+functions:
+  getPasses:
+    handler: api/passes.list
+    memorySize: 128
+    description: Get all satellite passes
+    events:
+      - http:
+          path: passes
+          method: get
+
+resources:
+  Resources:
+    PassesDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: "passDate"
+            AttributeType: "S"
+          -
+            AttributeName: "passTime"
+            AttributeType: "S"
+        KeySchema:
+          -
+            AttributeName: "passDate"
+            KeyType: "HASH"
+          -
+            AttributeName: passTime
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: "NEW_AND_OLD_IMAGES"
+        TableName: ${self:provider.environment.PASS_TABLE}
