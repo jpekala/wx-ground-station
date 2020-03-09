@@ -15,17 +15,16 @@ function load() {
   $('#location').html(GROUND_STATION_LAT + ', ' + GROUND_STATION_LON);
   getUpcomingPassInfo();
   getAllUpcomingPasses();
-  getImageMetadata(DIR_NAME, function (err, metadata) {
-    if (err) {
-      $('#messages').html('<div class="alert alert-danger" role="alert">Error getting image metadata: ' + err + '</div>');
-      return;
-    }
+  //getDynamoPasses();
+  getDynamoPasses(function (metadata) {
+    //console.log("HERE" + metadata);
+
     $('#messages').html('');
 
     // show newest first
     var sortedMeta = metadata.sort(function (m1, m2) {
-      var m1key = m1.date + "-" + m1.time;
-      var m2key = m2.date + "-" + m2.time;
+      var m1key = m1.passDate + "-" + m1.passTime;
+      var m2key = m2.passDate + "-" + m2.passTime;
       return (m1key > m2key) ? -1 : 1;
     });
 
@@ -44,8 +43,8 @@ function load() {
       var satLink = '<a target="_blank" href="' + getSatelliteLink([m.tle1, m.tle2]) + '">' + m.satellite + '</a>';
       $('#previous_passes').append([
         //'<br clear="all"/>',
-        '<h3 class="mt-1">', convertToLocal(m.date,m.time), '</h3>',
-        '<p>', m.date, '  ', m.time, '<p>',
+        '<h3 class="mt-1">', convertToLocal(m.passDate,m.passTime), '</h3>',
+        '<p>', m.passDate, '  ', m.passTime, '<p>',
         '<div class="row" style="margin-left:0px;">',
           '<div id=', mapId, ' style="height: 240px;" class="col-lg-6 col-md-6 col-xs-11 col-11">',
           '</div>',
@@ -88,11 +87,11 @@ function load() {
       var bounds = groundTrackMap.getBounds();
       var marker = L.marker([GROUND_STATION_LAT, GROUND_STATION_LON], {title: GROUND_STATION_NAME}).addTo(groundTrackMap);
 
-      var t = m.time.split(' ').join('');
-      var captureTime = new Date(m.date + 'T' + t).getTime();
-      if (m.duration) {
+      var t = m.passTime.split(' ').join('');
+      var captureTime = new Date(m.passDate + 'T' + t).getTime();
+      if (m.passDuration) {
         // get the current orbit at the middle of the pass duration so it is the correct orbit for the ground station location.
-        captureTime += (m.duration/2) * 1000;
+        captureTime += (m.passDuration/2) * 1000;
       }
 
       const orbits = tlejs.getGroundTrackLatLng(
@@ -211,10 +210,21 @@ function getImageMetadata(DIR_NAME, cb) {
     });
 
     Promise.all(promises).then(function(results) {
-        cb(null, results);
+      //console.log(results);
+      cb(null, results);
     })
 
   });
+}
+
+function getDynamoPasses(cb){
+  const fetchPromise = fetch(PASS_URL);
+fetchPromise.then(response => {
+  return response.json();
+}).then(passes => {
+  const passList = passes.passes.map(satPass => satPass.passDate).join("\n");
+  cb(passes.passes);
+});
 }
 
 // Get upcoming passes to show all passes

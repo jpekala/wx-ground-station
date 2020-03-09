@@ -6,7 +6,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 module.exports.list = (event, context, callback) => {
     var params = {
         TableName: process.env.PASS_TABLE,
-        ProjectionExpression: "passDate,passTime"
+        ProjectionExpression: "satellite,passDate,passTime,imageKey,images,chan_a,chan_b,direction,tle1,tle2,passDuration,frequency,elevation,gain"
     };
 
     console.log("Scanning passes table.");
@@ -19,7 +19,10 @@ module.exports.list = (event, context, callback) => {
             console.log("Scan succeeded.");
             return callback(null, {
                 statusCode: 200,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  "Access-Control-Allow-Origin" : "*",
+                  'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     passes: data.Items
                 })

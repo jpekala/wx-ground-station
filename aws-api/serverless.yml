@@ -3,7 +3,7 @@ service: passes
 provider:
   name: aws
   runtime: nodejs12.x
-  stage: dev
+  stage: prod
   region: us-west-2
   environment:
       PASS_TABLE: ${self:service}-${opt:stage, self:provider.stage}

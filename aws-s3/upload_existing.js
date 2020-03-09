@@ -50,12 +50,14 @@ s3.listObjects({Prefix: DIR_NAME}, function(err, data) {
             var db_content = JSON.parse(content);
             db_content.passDate = db_content.date;
             db_content.passTime = db_content.time;
+            db_content.passDuration = db_content.duration;
             delete db_content.date;
             delete db_content.time;
+            delete db_content.duration;
             //console.log(db_content);
 
             var params = {
-              TableName: 'passes-dev',
+              TableName: 'passes-prod',
               Item: db_content,
               ReturnConsumedCapacity: "TOTAL"
             };
