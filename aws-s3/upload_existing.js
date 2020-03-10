@@ -11,7 +11,7 @@ var AWS = require('aws-sdk');
 
 // Set the region
 AWS.config.update({
-  region: "us-west-2"
+  region: REGION
 });
 
 var s3 = new AWS.S3({
@@ -27,7 +27,7 @@ s3.listObjects({Prefix: DIR_NAME}, function(err, data) {
   if (err){
     console.log(err, err.stack); // an error occurred
   } else {
-    //console.log(metadata);  // successful response
+
     var pattern = new RegExp(".+-[0-9]+[0-9]+\.json$");
     var jsonFiles = data.Contents.filter(function (object) {
       return pattern.test(object.Key);
@@ -39,15 +39,20 @@ s3.listObjects({Prefix: DIR_NAME}, function(err, data) {
           Bucket: BUCKET,
           Key: m.Key
       }
-
+      console.log(m.Key);
       //Fetch or read data from aws s3
+      /*
       s3.getObject(getParams, function (err, data) {
 
           if (err) {
               console.log(err);
           } else {
+
             var content = data.Body.toString();
             var db_content = JSON.parse(content);
+
+            // Replaces key names for date, time, and duration
+            // to avoid reserved term conflicts with DynamoDB
             db_content.passDate = db_content.date;
             db_content.passTime = db_content.time;
             db_content.passDuration = db_content.duration;
@@ -73,7 +78,7 @@ s3.listObjects({Prefix: DIR_NAME}, function(err, data) {
           }
 
       })
-
+      */
     });
   }
 });

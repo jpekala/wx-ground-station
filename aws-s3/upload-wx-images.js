@@ -254,6 +254,62 @@ function uploadMetadata(filebase) {
 
 }
 
+// Function to upload pass information to DynamoD
+function uploadtoDynamo(keyname){
+
+  // Create the DynamoDB service object
+  var docClient = new AWS.DynamoDB.DocumentClient();
+  // Key name (name of JSON file to upload)
+  var s3key = "images/" + keyname + ".json";
+  console.log(s3key);
+  //construct getParam
+  var getParams = {
+      Bucket: BUCKET,
+      Key: s3key
+  }
+
+  //Fetch or read data from aws s3
+  s3.getObject(getParams, function (err, data) {
+
+    if (err) {
+      console.log(err);
+    } else {
+
+      var content = data.Body.toString();
+      var db_content = JSON.parse(content);
+
+      // Replaces key names for date, time, and duration
+      // to avoid reserved term conflicts with DynamoDB
+      db_content.passDate = db_content.date;
+      db_content.passTime = db_content.time;
+      db_content.passDuration = db_content.duration;
+      delete db_content.date;
+      delete db_content.time;
+      delete db_content.duration;
+
+      // Create params for DynamoDB
+      var dbParams = {
+        TableName: 'passes-prod',
+        Item: db_content,
+        ReturnConsumedCapacity: "TOTAL"
+      };
+
+      console.log("Adding a new item...");
+
+      // Put command to upload info to DynamoDB
+      docClient.put(dbParams, function(err, data) {
+        if (err) {
+            console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+        } else {
+            console.log("Added item:", JSON.stringify(keyname, null, 2));
+        }
+      });
+    }
+
+  })
+
+}
+
 // Find all the files that match the filebase plus a wildcard of capital
 // letters followed by any character and a png extension such as
 // /home/pi/wx-ground-station/images/NOAA15-20200227-141322-MCIR.png
@@ -284,7 +340,10 @@ glob(filebase + "-[A-Z]*.png", {}, function (err, files) { //<- Old version
             console.log("values: " + JSON.stringify(values, null, 2));
             // Call function to upload metadata to S3
             uploadMetadata(path.basename(filebase));
+            // Call function to send a Discord message about the pass
             discord(satellite,keyname,elevation,direction);
+            // Upload all information to DynamoDB
+            uploadtoDynamo(keyname);
           });
         }
       });
