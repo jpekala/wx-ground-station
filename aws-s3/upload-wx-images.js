@@ -119,70 +119,95 @@ async function uploadImage(image, filename) {
   };
 
   // Upload image
-  // Load font included in Jimp
-  var font = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
-  // Create a new image with width, height, and image background
-  var newImage = await new Jimp(image.bitmap.width, image.bitmap.height+64, '#000000');
-  if (filename.endsWith("-PRISTINE.png")){
-    newImage.composite(image, 0, 0);
-    image = newImage;
-    console.log(filename + " image created (pristine)");
-  } else{
-    // Composites another Jimp image over image at x, y
-    newImage.composite(image, 0, 48);
-    image = newImage;
-    // Print image details and location at the top of the image
-    image.print(font, 5, 5, metadata.date + " " + metadata.time + "  satellite: " + metadata.satellite +
-      "  elevation: " + metadata.elevation + '\xB0' + "  enhancement: " + enhancement);
-    image.print(font, 5, 25, LOCATION);
-    console.log(filename + " image created");
-  }
-
-  // Put image in buffer to upload
-  image.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
-    // Parameters needed to upload file to S3
-    var params = {
+  if(process.env.WATERMARK==0){
+    //Upload images
+    var upContent = fs.readFileSync(rootdirname + "images/" + filename);
+    var upParams = {
       ACL: "public-read",
       ContentType: "image/png",
       Bucket: BUCKET,
       Key: IMAGE_DIR + filename,
-      Body: buffer
+      Body: upContent
     };
-    // Upload file to S3
-    s3.putObject(params, (err, data) => {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log("  successfully uploaded " + filename);
-      }
-    });
-  });
+    uploadS3(upParams,filename);
 
-  // Upload thumbs
-  // Clone the image to the thumb variable
-  var thumb = image.clone();
-  // Scale the image to the given w & h, some parts of image may be clipped
-  thumb.cover(260, 200);
-  var thumbFilename = "thumbs/" + filename;
-  // Put image in buffer to upload
-  thumb.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
-    // Parameters needed to upload file to S3
-    var params = {
-      ACL: "public-read",
-      ContentType: "image/png",
-      Bucket: BUCKET,
-      Key: IMAGE_DIR + thumbFilename,
-      Body: buffer
-    };
-    // Upload file to S3
-    s3.putObject(params, (err, data) => {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log("  successfully uploaded thumb " + filename);
-      }
+    // Upload thumbs
+    var newImage = await new Jimp(image.bitmap.width, image.bitmap.height+64, '#000000');
+    newImage.composite(image, 0, 0);
+    image = newImage;
+    // Clone the image to the thumb variable
+    var thumb = image.clone();
+    // Scale the image to the given w & h, some parts of image may be clipped
+    thumb.cover(260, 200);
+    var thumbFilename = "thumbs/" + filename;
+    // Put image in buffer to upload
+    thumb.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
+      // Parameters needed to upload file to S3
+      var params = {
+        ACL: "public-read",
+        ContentType: "image/png",
+        Bucket: BUCKET,
+        Key: IMAGE_DIR + thumbFilename,
+        Body: buffer
+      };
+      // Upload file to S3
+      uploadS3(params,filename);
     });
-  });
+
+  } else {
+    // Load font included in Jimp
+    var font = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
+    // Create a new image with width, height, and image background
+    var newImage = await new Jimp(image.bitmap.width, image.bitmap.height+64, '#000000');
+    if (filename.endsWith("-PRISTINE.png")){
+      newImage.composite(image, 0, 0);
+      image = newImage;
+      console.log(filename + " image created (pristine)");
+    } else{
+      // Composites another Jimp image over image at x, y
+      newImage.composite(image, 0, 48);
+      image = newImage;
+      // Print image details and location at the top of the image
+      image.print(font, 5, 5, metadata.date + " " + metadata.time + "  satellite: " + metadata.satellite +
+        "  elevation: " + metadata.elevation + '\xB0' + "  enhancement: " + enhancement);
+      image.print(font, 5, 25, LOCATION);
+      console.log(filename + " image created");
+    }
+
+    // Put image in buffer to upload
+    image.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
+      // Parameters needed to upload file to S3
+      var params = {
+        ACL: "public-read",
+        ContentType: "image/png",
+        Bucket: BUCKET,
+        Key: IMAGE_DIR + filename,
+        Body: buffer
+      };
+      // Upload file to S3
+      uploadS3(params,filename);
+    });
+
+    // Upload thumbs
+    // Clone the image to the thumb variable
+    var thumb = image.clone();
+    // Scale the image to the given w & h, some parts of image may be clipped
+    thumb.cover(260, 200);
+    var thumbFilename = "thumbs/" + filename;
+    // Put image in buffer to upload
+    thumb.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
+      // Parameters needed to upload file to S3
+      var params = {
+        ACL: "public-read",
+        ContentType: "image/png",
+        Bucket: BUCKET,
+        Key: IMAGE_DIR + thumbFilename,
+        Body: buffer
+      };
+      // Upload file to S3
+      uploadS3(params,filename);
+    });
+  }
 
   // Return image information that was uploaded
   return imageInfo;
@@ -194,7 +219,6 @@ function uploadMetadata(filebase) {
   // Upload JSON
   // Define name for the JSON file that contains all the metadata
   var metadataFilename = filebase + ".json";
-  console.log("uploading metadata " + JSON.stringify(metadata, null, 2));
   // Parameters needed to upload file to S3
   var params = {
     ACL: "public-read",
@@ -207,7 +231,6 @@ function uploadMetadata(filebase) {
   //Upload map
   var mapFilename = filebase + "-map.png";
   var mapContent = fs.readFileSync(rootdirname + "images/" + mapFilename);
-  console.log("uploading map file " + mapFilename);
   var mapParams = {
     ACL: "public-read",
     ContentType: "image/png",
@@ -220,7 +243,6 @@ function uploadMetadata(filebase) {
   //Upload Audio
   var audioFilename = filebase + ".wav";
   var audioContent = fs.readFileSync(rootdirname + "audio/" + audioFilename);
-  console.log("uploading audio file " + audioFilename);
   var audioParams = {
     ACL: "public-read",
     Bucket: BUCKET,
@@ -232,7 +254,6 @@ function uploadMetadata(filebase) {
   //Upload Logs
   var logFilename = filebase + ".log";
   var logContent = fs.readFileSync(rootdirname + "logs/" + logFilename);
-  console.log("uploading log file " + logFilename);
   var logParams = {
     ACL: "public-read",
     Bucket: BUCKET,
@@ -241,17 +262,17 @@ function uploadMetadata(filebase) {
   };
   uploadS3(logParams,logFilename);
 
-  // Function to upload file to S3
-  function uploadS3(params,fileName){
-    s3.putObject(params, function(err, data) {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log("  successfully uploaded " + fileName);
-      }
-    });
-  }
+}
 
+// Function to upload file to S3
+function uploadS3(params,fileName){
+  s3.putObject(params, function(err, data) {
+    if (err) {
+      console.log(err)
+    } else {
+      console.log("  successfully uploaded " + fileName);
+    }
+  });
 }
 
 // Function to upload pass information to DynamoD

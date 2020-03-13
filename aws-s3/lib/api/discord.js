@@ -10,7 +10,6 @@ module.exports = function(satDetails,passKey,passElevation,passDirection,){ //pa
   "\nelevation: "+passElevation+"°"+
   "\ndirection: "+passDirection+
   "\n["+passKey+"]("+process.env.WEBSITE_ADDR+"/images/"+passKey+"-MCIR-precip.png \"NOAA19-20200307-002236\")";
-  console.log(discordMsg);
 
   request.post(
       webhook,
@@ -26,7 +25,7 @@ module.exports = function(satDetails,passKey,passElevation,passDirection,){ //pa
       },
       function (error, response, body) {
           if (!error && response.statusCode == 200) {
-            //console.log(body);
+            console.log("Message sent to Discord");
           }
       }
   ); // End POST request first webhook

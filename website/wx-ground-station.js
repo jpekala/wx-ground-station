@@ -15,9 +15,7 @@ function load() {
   $('#location').html(GROUND_STATION_LAT + ', ' + GROUND_STATION_LON);
   getUpcomingPassInfo();
   getAllUpcomingPasses();
-  //getDynamoPasses();
   getDynamoPasses(function (metadata) {
-    //console.log("HERE" + metadata);
 
     $('#messages').html('');
 
