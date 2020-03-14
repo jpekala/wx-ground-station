@@ -119,9 +119,11 @@ async function uploadImage(image, filename) {
   };
 
   // Upload image
+  // Determine if watermark will be applied (0 = no watermark)
   if(process.env.WATERMARK==0){
-    //Upload images
+    // Read image from local  directory
     var upContent = fs.readFileSync(rootdirname + "images/" + filename);
+    //  Parameters needed to upload file to S3
     var upParams = {
       ACL: "public-read",
       ContentType: "image/png",
@@ -129,9 +131,11 @@ async function uploadImage(image, filename) {
       Key: IMAGE_DIR + filename,
       Body: upContent
     };
+    // Upload file to S3
     uploadS3(upParams,filename);
 
     // Upload thumbs
+    //Create a Jimp image that will be sized for thumbnails
     var newImage = await new Jimp(image.bitmap.width, image.bitmap.height+64, '#000000');
     newImage.composite(image, 0, 0);
     image = newImage;
@@ -150,8 +154,9 @@ async function uploadImage(image, filename) {
         Key: IMAGE_DIR + thumbFilename,
         Body: buffer
       };
+      var thumbName = "thumb/"+filename;
       // Upload file to S3
-      uploadS3(params,filename);
+      uploadS3(params,thumbName);
     });
 
   } else {
@@ -215,74 +220,89 @@ async function uploadImage(image, filename) {
 
 // Function to upload JSON file with all of the pass metadata
 function uploadMetadata(filebase) {
+  // Create a promise to return
+  return new Promise((resolve, reject)=> {
+    // Upload JSON
+    // Define name for the JSON file that contains all the metadata
+    var metadataFilename = filebase + ".json";
+    // Parameters needed to upload file to S3
+    var params = {
+      ACL: "public-read",
+      Bucket: BUCKET,
+      Key: IMAGE_DIR + metadataFilename,
+      Body: JSON.stringify(metadata, null, 2)
+    };
+    var metaUp = uploadS3(params,metadataFilename);
 
-  // Upload JSON
-  // Define name for the JSON file that contains all the metadata
-  var metadataFilename = filebase + ".json";
-  // Parameters needed to upload file to S3
-  var params = {
-    ACL: "public-read",
-    Bucket: BUCKET,
-    Key: IMAGE_DIR + metadataFilename,
-    Body: JSON.stringify(metadata, null, 2)
-  };
-  uploadS3(params,metadataFilename);
+    // Upload map
+    // Define map file  name and read from local directory
+    var mapFilename = filebase + "-map.png";
+    var mapContent = fs.readFileSync(rootdirname + "images/" + mapFilename);
+    // Parameters needed to upload file to S3
+    var mapParams = {
+      ACL: "public-read",
+      ContentType: "image/png",
+      Bucket: BUCKET,
+      Key: MAP_DIR + mapFilename,
+      Body: mapContent
+    };
+    var mapUp = uploadS3(mapParams,mapFilename);
 
-  //Upload map
-  var mapFilename = filebase + "-map.png";
-  var mapContent = fs.readFileSync(rootdirname + "images/" + mapFilename);
-  var mapParams = {
-    ACL: "public-read",
-    ContentType: "image/png",
-    Bucket: BUCKET,
-    Key: MAP_DIR + mapFilename,
-    Body: mapContent
-  };
-  uploadS3(mapParams,mapFilename);
+    //Upload Audio
+    // Define wav file name and read from local directory
+    var audioFilename = filebase + ".wav";
+    var audioContent = fs.readFileSync(rootdirname + "audio/" + audioFilename);
+    // Parameters needed to upload file to S3
+    var audioParams = {
+      ACL: "public-read",
+      Bucket: BUCKET,
+      Key: AUDIO_DIR + audioFilename,
+      Body: audioContent
+    };
+    var audioUp = uploadS3(audioParams,audioFilename);
 
-  //Upload Audio
-  var audioFilename = filebase + ".wav";
-  var audioContent = fs.readFileSync(rootdirname + "audio/" + audioFilename);
-  var audioParams = {
-    ACL: "public-read",
-    Bucket: BUCKET,
-    Key: AUDIO_DIR + audioFilename,
-    Body: audioContent
-  };
-  uploadS3(audioParams,audioFilename);
+    //Upload Logs
+    // Define log file name and read from local directory
+    var logFilename = filebase + ".log";
+    var logContent = fs.readFileSync(rootdirname + "logs/" + logFilename);
+    // Parameters needed to upload file to S3
+    var logParams = {
+      ACL: "public-read",
+      Bucket: BUCKET,
+      Key: LOG_DIR + logFilename,
+      Body: logContent
+    };
+    var logUp = uploadS3(logParams,logFilename);
 
-  //Upload Logs
-  var logFilename = filebase + ".log";
-  var logContent = fs.readFileSync(rootdirname + "logs/" + logFilename);
-  var logParams = {
-    ACL: "public-read",
-    Bucket: BUCKET,
-    Key: LOG_DIR + logFilename,
-    Body: logContent
-  };
-  uploadS3(logParams,logFilename);
-
+    // Put all promises into  a single promise array
+    // Resolve when all promises have resolved
+    Promise.all([metaUp, mapUp, audioUp, logUp]).then((result) => {
+      resolve();
+    });
+  });
 }
 
 // Function to upload file to S3
 function uploadS3(params,fileName){
-  s3.putObject(params, function(err, data) {
-    if (err) {
-      console.log(err)
-    } else {
-      console.log("  successfully uploaded " + fileName);
-    }
+  return new Promise((resolve, reject)=> {
+    s3.putObject(params, function(err, data) {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log("  successfully uploaded to S3 - " + fileName);
+        resolve();
+      }
+    });
   });
 }
 
 // Function to upload pass information to DynamoD
 function uploadtoDynamo(keyname){
-
   // Create the DynamoDB service object
   var docClient = new AWS.DynamoDB.DocumentClient();
   // Key name (name of JSON file to upload)
   var s3key = "images/" + keyname + ".json";
-  console.log(s3key);
+  console.log("Looking up log file for DynaoDB upload: " + s3key);
   //construct getParam
   var getParams = {
       Bucket: BUCKET,
@@ -315,20 +335,19 @@ function uploadtoDynamo(keyname){
         ReturnConsumedCapacity: "TOTAL"
       };
 
-      console.log("Adding a new item...");
+      console.log("Adding a new item to DynamoDB...");
 
       // Put command to upload info to DynamoDB
       docClient.put(dbParams, function(err, data) {
         if (err) {
-            console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+            console.error("Unable to add item to DyanamoDB. Error JSON:", JSON.stringify(err, null, 2));
         } else {
-            console.log("Added item:", JSON.stringify(keyname, null, 2));
+            console.log("Added to DynamoDB - item:", JSON.stringify(keyname, null, 2));
         }
       });
     }
 
   })
-
 }
 
 // Find all the files that match the filebase plus a wildcard of capital
@@ -336,15 +355,15 @@ function uploadtoDynamo(keyname){
 // /home/pi/wx-ground-station/images/NOAA15-20200227-141322-MCIR.png
 // this will leave out map file as it is handled in the metadata upload
 glob(filebase + "-[A-Z]*.png", {}, function (err, files) { //<- Old version
-  console.log(filebase);
   //Create an array to upload files and store promise
   var uploadPromises = [];
+
+  var keyname = components[0] + "-" + components[1] + "-" + components[2];
   //Iterate through each file
   files.forEach(function(filename) {
     // Get the last part of the path returned by filename
     // Ensures we only get file name such as NOAA15-20200227-141322-MCIR.png
     var basename = path.basename(filename);
-    var keyname = components[0] + "-" + components[1] + "-" + components[2];
     // Open the image file; using promise notation
     Jimp.read(filename)
       .then(image => {
@@ -358,15 +377,16 @@ glob(filebase + "-[A-Z]*.png", {}, function (err, files) { //<- Old version
             // Set value for metadata.values in the array to
             // the 'values' variable in the returned promise
             metadata.images = values;
-            console.log("values: " + JSON.stringify(values, null, 2));
             // Call function to upload metadata to S3
-            uploadMetadata(path.basename(filebase));
-            // Call function to send a Discord message about the pass
-            discord(satellite,keyname,elevation,direction);
-            // Upload all information to DynamoDB
-            uploadtoDynamo(keyname);
+            uploadMetadata(path.basename(filebase)).then(function(result) {
+              console.log("Images uploaded to S3: " + JSON.stringify(values, null, 2));
+              // Upload all information to DynamoDB
+              uploadtoDynamo(keyname);
+              // Call function to send a Discord message about the pass
+              discord(satellite,keyname,elevation,direction);
+            });
           });
         }
-      });
-  });
+      })
+    });
 });
