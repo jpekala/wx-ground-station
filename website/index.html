@@ -56,6 +56,17 @@
     .logo {
       width: 150px;
     }
+    .pagination a.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .pagination a:hover:not(.active) {
+      background-color: #ddd;
+    }
+    .page_item {
+      color: #f00100;
+    }
     #static_map {
       height: 320px;
       width: 50%;
@@ -118,6 +129,13 @@
         <h4>Recent captures:</h4>
       </div>
       <div id="messages"></div>
+    </div>
+
+    <div>
+      <nav aria-label="Page navigation example">
+        <ul id="pages" class="pagination justify-content-center">
+        </ul>
+      </nav>
     </div>
 
     <!-- Modal -->

@@ -10,6 +10,17 @@ function getSatelliteLink(tles) {
   return "https://www.n2yo.com/satellite/?s=" + satNum;
 }
 
+// Get URL parameters
+// This will be use to get page numbers
+function getURLParameter(name, url) {
+  if (!url) url = window.location.href;
+  name = name.replace(/[\[\]]/g, '\\$&');
+  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+      results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
 
 function load() {
   $('#location').html(GROUND_STATION_LAT + ', ' + GROUND_STATION_LON);
@@ -28,13 +39,45 @@ function load() {
 
     var captureCount = 0;
 
+    // Function to convert time for each pass
     function convertToLocal(date,time){
       var combinedDate = date + " " + time.replace(" +0000","");
       var local = moment.utc(combinedDate).local().format('YYYY-MM-DD HH:mm:ss');
       return local;
     }
 
-    sortedMeta.forEach(function (m) {
+    // Pagination
+    // Get sorted JSON  array
+    var json = sortedMeta;
+    // Find the total number of records in the array
+    var totalJSON = json.length;
+    // Determine number of pages that will need to be displayed
+    // Rounding up to ensure the last set of records are visible
+    var totalPages = Math.ceil(totalJSON/MAX_CAPTURES);
+    // Current pages
+    var page = getURLParameter('page');
+    // Variable to add active class to list element
+    var activeClass
+    // Variables for Prev and next
+    var prevPage = parseInt(page) - 1;
+    var nextPage = parseInt(page) + 1;
+    //  Create list  elements
+    for (let i=1; i<totalPages; i++) { // will loop 3 times (length of arr = 3)
+      if(i==page){ activeClass = 'active';} else {activeClass = '';}
+      if(i==1){$('#pages').append(['<li class="page-item"><a class="page-link" href="index.html?page='+prevPage+'">Previous</a></li>'].join(''));}
+      $('#pages').append(['<li class="page-item '+activeClass+'"><a class="page-link" href="index.html?page='+i+'">'+i+'</a></li>'].join(''));
+      if(i==totalPages-1){$('#pages').append(['<li class="page-item"><a class="page-link" href="index.html?page='+nextPage+'">Next</a></li>'].join(''));}
+    }
+
+    var recPerPage = MAX_CAPTURES;
+    // Use Math.max to ensure that we at least start from record 0
+    var startRec = Math.max(page - 1, 0) * MAX_CAPTURES;
+    // Define end of array and stay within bounds of record set
+    var endRec = Math.min(startRec + recPerPage, totalJSON);
+    var recordsToShow = json.splice(startRec, endRec);
+
+    // Displays each pass
+    recordsToShow.forEach(function (m) {
       if (++captureCount > MAX_CAPTURES) return;
       if (m == null) return;
       var mapId = m.imageKey + '-gt';
@@ -182,7 +225,7 @@ function load() {
   });
 }
 
-
+// Gets JSON file for a pass
 function getImageMetadata(DIR_NAME, cb) {
   var pattern = new RegExp(".+-[0-9]+[0-9]+\.json$");
   s3.listObjects({Prefix: DIR_NAME}, function(err, data) {
@@ -215,6 +258,7 @@ function getImageMetadata(DIR_NAME, cb) {
   });
 }
 
+// Get passes from API
 function getDynamoPasses(cb){
   const fetchPromise = fetch(PASS_URL);
 fetchPromise.then(response => {

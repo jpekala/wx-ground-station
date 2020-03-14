@@ -220,8 +220,8 @@ npm install
 In the file `aws-s3/upload-wx-images.js` set REGION, BUCKET, and LOCATION to the correct values. The Node.js script prepares the images for upload by creating thumbnail images, printing some metadata on the images, and creating a JSON metadata file for each image capture. The LOCATION string will be printed on the images that you capture. Here are my values just for reference; you'll need to replace the long and lat if you want that included.
 
 ```
-var REGION = "us-west-1";
-var BUCKET = "wximages";
+var REGION = "us-west-2";
+var BUCKET = "wx.k6kzo.com";
 var LOCATION = "K6KZO weather ground station, Austin, Texas, USA  [long,lat]";
 ```
 
@@ -313,6 +313,6 @@ cd src
 
 If you want to be able to run the bias tee program from anywhere on the command line you can also run "sudo make install".
 
-If you have trouble running the bias tee check with a multimeter if there is 4.5V at the SMA port. Also check that your powered device is actually capable of receiving power. Remember that not all LNA's can accept bias tee power. 
+If you have trouble running the bias tee check with a multimeter if there is 4.5V at the SMA port. Also check that your powered device is actually capable of receiving power. Remember that not all LNA's can accept bias tee power.
 
 Once installed, uncomment the `rtl_biast` lines toward the top of `receive_and_process_satellite.sh`. This will turn the LNA on right before starting to record and off after capturing the signal. **Make sure that you also update the path if you have installed `rtl_biast` in a different location**
