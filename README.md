@@ -313,6 +313,6 @@ cd src
 
 If you want to be able to run the bias tee program from anywhere on the command line you can also run "sudo make install".
 
-If you have trouble running the bias tee check with a multimeter if there is 4.5V at the SMA port. Also check that your powered device is actually capable of receiving power. Remember that not all LNA's can accept bias tee power. We recommend Adam 9A4QV's LNA4ALL, as you can order this from his store with the bias tee power option enabled. If you need further help please contact us at admin@rtl-sdr.com.
+If you have trouble running the bias tee check with a multimeter if there is 4.5V at the SMA port. Also check that your powered device is actually capable of receiving power. Remember that not all LNA's can accept bias tee power. 
 
 Once installed, uncomment the `rtl_biast` lines toward the top of `receive_and_process_satellite.sh`. This will turn the LNA on right before starting to record and off after capturing the signal. **Make sure that you also update the path if you have installed `rtl_biast` in a different location**

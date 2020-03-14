@@ -9,7 +9,9 @@ module.exports = function(satDetails,passKey,passElevation,passDirection,){ //pa
   "\n" + satDetails +
   "\nelevation: "+passElevation+"°"+
   "\ndirection: "+passDirection+
-  "\n["+passKey+"]("+process.env.WEBSITE_ADDR+"/images/"+passKey+"-MCIR-precip.png \"NOAA19-20200307-002236\")";
+  "\n["+process.env.WEBSITE_ADDR+"]("+process.env.WEBSITE_ADDR+")"+
+  "\n"+
+  "\n["+passKey+"]("+process.env.WEBSITE_ADDR+"/images/"+passKey+"-MCIR-precip.png \""+passKey+"\")";
 
   request.post(
       webhook,
