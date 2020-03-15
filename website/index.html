@@ -60,7 +60,14 @@
       background-color: #4CAF50;
       color: white;
     }
-
+    .pagination {
+      display: -ms-flexbox;
+      flex-wrap: wrap;
+      display: flex;
+      padding-left: 0;
+      list-style: none;
+      border-radius: 0.25rem;
+    }
     .pagination a:hover:not(.active) {
       background-color: #ddd;
     }
@@ -129,13 +136,12 @@
         <h4>Recent captures:</h4>
       </div>
       <div id="messages"></div>
-    </div>
-
-    <div>
-      <nav aria-label="Page navigation example">
-        <ul id="pages" class="pagination justify-content-center">
-        </ul>
-      </nav>
+      <div>
+        <nav aria-label="Page navigation example">
+          <ul id="pages" class="pagination justify-content-center">
+          </ul>
+        </nav>
+      </div>
     </div>
 
     <!-- Modal -->

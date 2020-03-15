@@ -54,26 +54,34 @@ function load() {
     // Determine number of pages that will need to be displayed
     // Rounding up to ensure the last set of records are visible
     var totalPages = Math.ceil(totalJSON/MAX_CAPTURES);
+    console.log("total="+totalJSON+" "+totalPages);
     // Current pages
     var page = getURLParameter('page');
     // Variable to add active class to list element
-    var activeClass
+    var activeClass,disableClass,lastClass;
     // Variables for Prev and next
     var prevPage = parseInt(page) - 1;
     var nextPage = parseInt(page) + 1;
     //  Create list  elements
-    for (let i=1; i<totalPages; i++) { // will loop 3 times (length of arr = 3)
-      if(i==page){ activeClass = 'active';} else {activeClass = '';}
-      if(i==1){$('#pages').append(['<li class="page-item"><a class="page-link" href="index.html?page='+prevPage+'">Previous</a></li>'].join(''));}
+    for (let i=1; i<=totalPages; i++) {
+      // If on the first page, disable previous
+      if(page==1){ disableClass='disabled';} else { disableClass='';}
+      // If on th elast page, disable next
+      if(page==totalPages){ lastClass='disabled';} else { lastClass='';}
+      // Display current page number as active
+      if(page==i){ activeClass = 'active';} else {activeClass='';}
+      // List elements
+      if(i==1){$('#pages').append(['<li class="page-item '+disableClass+'"><a class="page-link" href="index.html?page='+prevPage+'">Previous</a></li>'].join(''));}
       $('#pages').append(['<li class="page-item '+activeClass+'"><a class="page-link" href="index.html?page='+i+'">'+i+'</a></li>'].join(''));
-      if(i==totalPages-1){$('#pages').append(['<li class="page-item"><a class="page-link" href="index.html?page='+nextPage+'">Next</a></li>'].join(''));}
+      if(i==totalPages){$('#pages').append(['<li class="page-item '+lastClass+'"><a class="page-link" href="index.html?page='+nextPage+'">Next</a></li>'].join(''));}
     }
-
+    // Determine how many records to show per page
     var recPerPage = MAX_CAPTURES;
     // Use Math.max to ensure that we at least start from record 0
-    var startRec = Math.max(page - 1, 0) * MAX_CAPTURES;
+    var startRec = Math.max(page - 1, 0) * recPerPage;
     // Define end of array and stay within bounds of record set
     var endRec = Math.min(startRec + recPerPage, totalJSON);
+    // Create JSON array for current page with appropriate records
     var recordsToShow = json.splice(startRec, endRec);
 
     // Displays each pass
