@@ -54,9 +54,9 @@ function load() {
     // Determine number of pages that will need to be displayed
     // Rounding up to ensure the last set of records are visible
     var totalPages = Math.ceil(totalJSON/MAX_CAPTURES);
-    console.log("total="+totalJSON+" "+totalPages);
     // Current pages
     var page = getURLParameter('page');
+    if(page==null){page=1;}
     // Variable to add active class to list element
     var activeClass,disableClass,lastClass;
     // Variables for Prev and next
