@@ -25,6 +25,7 @@ functions:
       - http:
           path: passes
           method: get
+          cors: true
 
 resources:
   Resources:

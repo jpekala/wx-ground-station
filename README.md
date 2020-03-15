@@ -19,10 +19,10 @@ The goal of this branch is to extend the functionality that has been established
 Here’s what you’ll need:
 
 * Raspberry Pi (version 3 or 4) - you'll need Wi-Fi if you are using it outdoors or away from a network connection
-*  Raspberry Pi case
+* Raspberry Pi case
 * MicroUSB power supply
 * 32GB SD card
-* SDR device - I recommend the RTL-SDR V3 dongle from  RTL-SDR.COM blog
+* SDR device - I recommend the RTL-SDR V3 dongle from RTL-SDR.COM blog
 * AWS account for hosting images and web content in an Amazon S3 bucket. You can sign up for the free tier for a year, and it’s still cheap after that
 * An antennea such as a dipole or a QFH
 * coaxial cable to go from your antenna to Raspberry Pi + RTL-SDR dongle. The dipole antenna kit comes with 3m of RG174 coax, but I used 10 feet of RG58 coax.
@@ -35,7 +35,7 @@ The website for the ground station will be a serverless application hosted on S3
 
 #### AWS Credentials
 
-The scripts that run on the RPI are powered by Node.js and the AWS JavaScript SDK. To get them to all work, you  will need to get credentials for your account. These two articles show you how to access or generate your credentials and store them for Node.js access:
+The scripts that run on the RPI are powered by Node.js and the AWS JavaScript SDK. To get them to all work, you will need to get credentials for your account. These two articles show you how to access or generate your credentials and store them for Node.js access:
 
 [Getting your credentials](https://docs.aws.amazon.com/en_pv/sdk-for-javascript/v2/developer-guide/getting-your-credentials.html)
 [Loading Credentials in Node.js from the Shared Credentials File](https://docs.aws.amazon.com/en_pv/sdk-for-javascript/v2/developer-guide/loading-node-credentials-shared.html)
@@ -66,8 +66,8 @@ At this point you should be able to load a simple web site from your new bucket.
 ```
 <!doctype html>
 <html>
-  <head><title>S3 test</title></head>
-  <body>Hello from S3</body>
+ <head><title>S3 test</title></head>
+ <body>Hello from S3</body>
 </html>
 ```
 
@@ -83,7 +83,7 @@ To give public users the ability to access your S3 bucket using the AWS SDK, you
 // Initialize the Amazon Cognito credentials provider
 AWS.config.region = 'us-west-1'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-  IdentityPoolId: 'us-west-1:1d02ae39-3a06-497e-b63c-799a070dd09d',
+ IdentityPoolId: 'us-west-1:1d02ae39-3a06-497e-b63c-799a070dd09d',
 });
 ```
 
@@ -91,18 +91,18 @@ AWS.config.credentials = new AWS.CognitoIdentityCredentials({
 
 ```
 {
-   "Version": "2012-10-17",
-   "Statement": [
-      {
-         "Effect": "Allow",
-         "Action": [
-            "s3:ListBucket"
-         ],
-         "Resource": [
-            "arn:aws:s3:::BUCKET_NAME"
-         ]
-      }
-   ]
+ "Version": "2012-10-17",
+ "Statement": [
+ {
+  "Effect": "Allow",
+  "Action": [
+  "s3:ListBucket"
+  ],
+  "Resource": [
+  "arn:aws:s3:::BUCKET_NAME"
+  ]
+ }
+ ]
 }
 ```
 
@@ -115,12 +115,12 @@ In IAM console, click `Roles`, then choose the unauthenticated user role previou
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
-    <CORSRule>
-        <AllowedOrigin>*</AllowedOrigin>
-        <AllowedMethod>GET</AllowedMethod>
-        <AllowedMethod>HEAD</AllowedMethod>
-        <AllowedHeader>*</AllowedHeader>
-    </CORSRule>
+ <CORSRule>
+ <AllowedOrigin>*</AllowedOrigin>
+ <AllowedMethod>GET</AllowedMethod>
+ <AllowedMethod>HEAD</AllowedMethod>
+ <AllowedHeader>*</AllowedHeader>
+ </CORSRule>
 </CORSConfiguration>
 ```
 ### Raspberry Pi Setup
@@ -217,37 +217,70 @@ cd aws-s3
 npm install
 ```
 
-In the file `aws-s3/upload-wx-images.js` set REGION, BUCKET, and LOCATION to the correct values. The Node.js script prepares the images for upload by creating thumbnail images, printing some metadata on the images, and creating a JSON metadata file for each image capture. The LOCATION string will be printed on the images that you capture. Here are my values just for reference; you'll need to replace the long and lat if you want that included.
+In the file `aws-s3/.env` set REGION, BUCKET, and STATION_LOCATION to the correct values. The Node.js script prepares the images for upload by creating thumbnail images, optionally printing some metadata on the images, and creating a JSON metadata file for each image capture. If you choose to add a watermark the STATION_LOCATION string will be printed on the images that you capture. Here are my values just for reference.
 
 ```
-var REGION = "us-west-2";
-var BUCKET = "wx.k6kzo.com";
-var LOCATION = "K6KZO weather ground station, Austin, Texas, USA  [long,lat]";
+#S3
+AWS_REGION=us-west-2
+AWS_BUCKET=wx.k6kzo.com
+
+#WATERMARK
+WATERMARK=0
+STATION_LOCATION="K6KZO Ground Station, Austin, Texas, USA"
+
+#DIRECTORIES
+DISCORD_WEBHOOK = [Enter webook here]
+WEBSITE_ADDR = https://wx.k6kzo.com
 ```
 
-Also set the REGION and BUCKET correctly in the files `aws-s3/upload-upcoming-passes.js` and `aws-s3/remove-wx-images.js`. Here are my values for reference; make sure to update to reflect your configuration:
+After that, you will need to setup the API that will provide all of the pass data. A serverless project is setup in the `aws-api` folder. You will just need to confirm one piece of information within the `serverless.yml` file. Open the file and specify the region. Make sure it is the same region as the rest of your other services like S3 as some of the functionality will depend on this configuration. I have used us-west-2 throughout. If you use the same region for your setup then you will not need to make any modifications.
+
+To deploy your API follow these commands:
 
 ```
-var REGION = "us-west-1";
-var BUCKET = "wximages";
+cd aws-api
+npm install
+sls deploy
 ```
+
+This will build your database in DynamoDB, create a Lambda service that will read the information from DynamoDB, and create an API Gateway to access the information from Lambda. When the process completes you should see the Service Information. You will need to find the following value. Note that your URL will be different.
+
+```
+endpoints:
+ GET - https://e78uek07l4.execute-api.us-west-2.amazonaws.com/prod/passes
+```
+
+Record this value to add to the PASS_URL in the next steps when you update `s3-vars.js`.
+
+You'll also want to confirm you see the following value right under the endpoint:
+
+```
+functions:
+ getPasses: passes-prod-getPasses
+```
+
+** If you run into any CORS issues with the API, you will need to enable CORS for the API endpoint. ** CORS has been enabled in the serverless.yml file but sometimes issues can arise that are fixed by enabling CORS. After you enable CORS support on your resource, you must deploy or redeploy the API for the new settings to take effect. To do this, run `sls deploy` again in the `aws-api` directory.
 
 Next you will need to make some changes to the web content. The web interface uses Mapbox to draw the live maps of the next upcoming satellite pass. You’ll need to create an account at [Mapbox](https://mapbox.com/) to get an access token. Their free tier lets you load 50,000 maps/month, so you are not likely to have any real costs. When logged into Mapbox, get your account token from [https://account.mapbox.com/](https://account.mapbox.com/).
 
-Next, in the file `website/wx-ground-station.js`, set your bucket name, AWS region, AWS credentials (the Cognito identity pool info you saved above), Mapbox token, and your ground station info. Some of my values are shown here for reference.
+Next, in the file `website/s3-vars.js`, set your bucket name, AWS region, AWS credentials (the Cognito identity pool info you saved above), Mapbox token, and your ground station info. Some of my values are shown here for reference.
 
 ```
-var bucketName = 'wximages';
-AWS.config.region = 'us-west-1'; // Region
+var bucketName = 'wx.k6kzo.com';
+AWS.config.region = 'us-west-2'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-    IdentityPoolId: 'us-west-1:1d02ae39-30a6-497e-b066-795f070de089'
+ IdentityPoolId: 'us-west-1:1d02ae39-30a6-497e-b066-795f070de089'
 });
 
 // Create a mapbox.com account and get access token
 const MAP_BOX_ACCESS_TOKEN = 'YOUR_MAPBOX_TOKEN';
-const GROUND_STATION_LAT =  38.8977;
+const GROUND_STATION_LAT = 38.8977;
 const GROUND_STATION_LON = -77.0365;
 const GROUND_STATION_NAME = 'K6KZO ground station';
+const MAX_CAPTURES = 10;
+const DIR_NAME = "images";
+const PASS_URL = "[Serverless API Endpoint]";
+
 ```
 
 #### Upload the Web Content to S3
@@ -257,7 +290,9 @@ Upload the the contents of the `website` directory to your S3 bucket using the S
 ```
 index.html
 wx-ground-station.js
+s3-vars.js
 tle.js
+moment.js
 logo.png
 ```
 
@@ -289,6 +324,10 @@ node aws-s3/remove-wx-images NOAA19-20191108-162650
 ```
 
 In the next few hours you’ll be able to see some images uploaded, depending on when satellites are scheduled to fly over. You may get up to 12 passes per day, usually 2 for each of the NOAA satellites in the morning, then 2 more for each of them in the evening.
+
+#### Optional CloudFront Setup with Custom URL
+
+As an optional step you can setup a CloudFront distribution to serve your website from a CDN. This also allows you to deploy a custom URL with an SSL certificate. To do so, see this [article](https://docs.aws.amazon.com/AmazonS3/latest/dev/website-hosting-cloudfront-walkthrough.html) for setting up CloudFront and this [article] (https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https-alternate-domain-names.html) on how to setup a custom URL. 
 
 ### Fine Tuning
 
