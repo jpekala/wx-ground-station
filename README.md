@@ -317,17 +317,27 @@ Even though you don’t have any images captured, you should be able to see the 
 
 The `wxtoimg` enhancements that are displayed depends on what sensors were active when the images were captured. If sensors 3 and 4 were active (usually at night), then the thermal enhancement will be shown. Otherwise a multispectral analysis enhancement will be shown.
 
-Not all images you capture will be good; the satellite may be too low or you may not get a good signal. You can clean up bad ones by using the script `aws-s3/remove-wx-images` on the Raspberry Pi. Just provide the key to the particular capture as an argument to remove all the images and the metadata from the S3 bucket.
+Not all images you capture will be good; the satellite may be too low or you may not get a good signal. You can clean up bad ones by using the script `aws-s3/remove-wx-images.js` on the Raspberry Pi. Just provide the key to the particular capture as an argument to remove all the images and the metadata from the S3 bucket.
 
 ```
-node aws-s3/remove-wx-images NOAA19-20191108-162650
+node aws-s3/remove-wx-images.js NOAA19-20191108-162650
 ```
 
 In the next few hours you’ll be able to see some images uploaded, depending on when satellites are scheduled to fly over. You may get up to 12 passes per day, usually 2 for each of the NOAA satellites in the morning, then 2 more for each of them in the evening.
 
+**Note - If you are upgrading from a previous version follow the steps below**
+
+You may be upgrading from a previous version and need to upload all of your information. First you will need to replace your installation with the one in this project. After that is complete, manually upload all JSON files into the images folder of your S3 bucket. After that you will be able to use the file `aws-s3/upload-existing.js` on the Raspberry Pi. To do so run the following command:
+
+```
+node aws-s3/upload_existing.js
+```
+
+After a few moments all of the pass information in each JSON file will be uploaded to DynamoDB and they will be visible on your website.
+
 #### Optional CloudFront Setup with Custom URL
 
-As an optional step you can setup a CloudFront distribution to serve your website from a CDN. This also allows you to deploy a custom URL with an SSL certificate. To do so, see this [article](https://docs.aws.amazon.com/AmazonS3/latest/dev/website-hosting-cloudfront-walkthrough.html) for setting up CloudFront and this [article] (https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https-alternate-domain-names.html) on how to setup a custom URL. 
+As an optional step you can setup a CloudFront distribution to serve your website from a CDN. This also allows you to deploy a custom URL with an SSL certificate. To do so, see this [article](https://docs.aws.amazon.com/AmazonS3/latest/dev/website-hosting-cloudfront-walkthrough.html) for setting up CloudFront and this [article] (https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https-alternate-domain-names.html) on how to setup a custom URL.
 
 ### Fine Tuning
 

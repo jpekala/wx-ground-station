@@ -41,7 +41,6 @@ s3.listObjects({Prefix: DIR_NAME}, function(err, data) {
       }
       console.log(m.Key);
       //Fetch or read data from aws s3
-      /*
       s3.getObject(getParams, function (err, data) {
 
           if (err) {
@@ -78,7 +77,7 @@ s3.listObjects({Prefix: DIR_NAME}, function(err, data) {
           }
 
       })
-      */
+
     });
   }
 });
