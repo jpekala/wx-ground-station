@@ -259,7 +259,7 @@ functions:
  getPasses: passes-prod-getPasses
 ```
 
-** If you run into any CORS issues with the API, you will need to enable CORS for the API endpoint. ** CORS has been enabled in the serverless.yml file but sometimes issues can arise that are fixed by enabling CORS. After you enable CORS support on your resource, you must deploy or redeploy the API for the new settings to take effect. To do this, run `sls deploy` again in the `aws-api` directory.
+**If you run into any CORS issues with the API, you will need to enable CORS for the API endpoint.** CORS has been enabled in the serverless.yml file but sometimes issues can arise that are fixed by enabling CORS. After you enable CORS support on your resource, you must deploy or redeploy the API for the new settings to take effect. To do this, run `sls deploy` again in the `aws-api` directory.
 
 Next you will need to make some changes to the web content. The web interface uses Mapbox to draw the live maps of the next upcoming satellite pass. You’ll need to create an account at [Mapbox](https://mapbox.com/) to get an access token. Their free tier lets you load 50,000 maps/month, so you are not likely to have any real costs. When logged into Mapbox, get your account token from [https://account.mapbox.com/](https://account.mapbox.com/).
 
@@ -337,7 +337,7 @@ After a few moments all of the pass information in each JSON file will be upload
 
 #### Optional CloudFront Setup with Custom URL
 
-As an optional step you can setup a CloudFront distribution to serve your website from a CDN. This also allows you to deploy a custom URL with an SSL certificate. To do so, see this [article](https://docs.aws.amazon.com/AmazonS3/latest/dev/website-hosting-cloudfront-walkthrough.html) for setting up CloudFront and this [article] (https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https-alternate-domain-names.html) on how to setup a custom URL.
+As an optional step you can setup a CloudFront distribution to serve your website from a CDN. This also allows you to deploy a custom URL with an SSL certificate. To do so, see this [article](https://docs.aws.amazon.com/AmazonS3/latest/dev/website-hosting-cloudfront-walkthrough.html) for setting up CloudFront and this [article](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https-alternate-domain-names.html) on how to setup a custom URL.
 
 ### Fine Tuning
 
