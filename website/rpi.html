@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>weather satellite ground station</title>
+    <!-- Favicon Stuff -->
+    <link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!--   Replace SDK_VERSION_NUMBER with the current SDK version number -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.540.0.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" crossorigin="anonymous">
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-158733438-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-158733438-1');
+    </script>
+
+    <style>
+    body {
+      background-color: #ffffff;
+      color: #000000;
+    }
+    .logo {
+      width: 150px;
+    }
+    #location {
+      margin-top: 0px;
+      color: #f00100;
+    }
+    </style>
+
+  </head>
+  <body>
+
+    <!-- Navbar -->
+    <div style="font-size: 0.9rem; font-family: Menlo,Monaco,Consolas,Courier New,monospace; margin-bottom: 0px" class="container">
+      <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="#"></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ml-auto">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item ml-auto">
+              <a class="nav-link" href="#" data-toggle="modal" data-target="#exampleModalLong">Pass Times</a>
+            </li>
+            <li class="nav-item ml-auto">
+              <a class="nav-link" href="qfh.html">QFH Antenna</a>
+            </li>
+            <li class="nav-item ml-auto">
+              <a class="nav-link"><strong>RPI Setup</strong></a>
+            </li>
+            <li class="nav-item ml-auto">
+              <a class="nav-link" target="_blank" href="https://github.com/alonsovargas3/wx-ground-station">Github</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Header -->
+      <div class="mb-5" style="border-bottom: 1px solid #CCCCCC;">
+        <img style="vertical-align: top" src="logo.png" class="logo"/>
+        <span class="navbar-text">
+          <h4>weather satellite ground station</h4>
+          <h6 id="location"></h6>
+          <p>Receiver: RTL-SDR
+          <br>Filter: SAWbird+ Filter & LNA / 137MHz center frequency
+          <br>Antenna: Quadrifilar Helix</p>
+        </span>
+      </div>
+
+      <div>
+        <h1 align="center">Raspberry Pi Hardware Setup</h1>
+
+        <p>Transporting the Raspberry PI, RTL-SDR dongle, and filter can be a little difficult. I decided to create a case that would help make the kit easier to plug in and use. In the fall, winter, and even some parts of the spring, I leave this outside permanently but I would not advise leaving this out during the summer as it may lead to heat issues.</p>
+
+        <p>I made a case for my RTL-SDR, LNA, and Raspberry Pi, which make my NOAA ground station. This is attached to a QFH antenna and is setup to automatically capture, decode, and upload NOAA satellite passes. All the decoded images and pass details are uploaded to an AWS website hosted via S3. See here:</p>
+
+        <p align="center"><img src="images/rpi1.jpg" width="550" alt="Raspberry Pi Case Open"></p>
+
+        <p>As you can see the RTL-SDR is connected to the Nooelec Filter + LNA using a jumper cable. The antenna connection protrudes just a bit from the case to allow it to connect to an antenna when closed. All of the hardware is on the case using Commander Strips.</p>
+
+        <p>That jumper cable is bending a little more than I'd like but that's about as much distance as I could create between the two devices/connections.</p>
+
+        <p>The RTL-SDR is connected to the RPI with a 12 inch USB cable. I dislike this part about the case and open to any suggestions. The 6in cable was not enough distance and didn't allow the case to be opened. It also required a lot of bending. This way, it may stick out of the case but the bend is better and less restrictive.</p>
+
+        <p align="center"><img src="images/rpi2.jpg" width="550" alt="Raspberry Pi Case Closed"></p>
+
+        <p>Once closed you can see the SMA connector for connecting to an antenna and the USB cable that connects the RTL-SDR and RPI. In the background on the top left you can see where the power cable comes in for the RPI. I've been monitoring temperature and it's usually between 42 and 50 degress Celcius but I have seen it go all the way up to around 58 degrees when uploading images.</p>
+
+        <p><strong>Parts List</strong></p>
+
+        <ul>
+          <li><a href="https://www.amazon.com/gp/product/B0129EBDS2/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1">RTL-SDR</a></li>
+          <li><a href="https://www.amazon.com/gp/product/B07TWPR871/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1">Nooelec Filter + LNA</a></li>
+          <li><a href="https://www.amazon.com/Raspberry-Pi-MS-004-00000024-Model-Board/dp/B01LPLPBS8/ref=sr_1_1?dd=MMSF-AS3ku4d4guSFxtbtg%2C%2C&keywords=raspberry+pi+3&qid=1582661015&refinements=p_85%3A2470955011%2Cp_36%3A1253504011%2Cp_90%3A8308921011&rnid=8308919011&rps=1&s=electronics&sr=1-1">Raspberry Pi 3</a></li>
+          <li><a href="https://www.amazon.com/Keyestudio-Enclosure-Clear-Shell-Raspberry/dp/B073RDB1QH/ref=sr_1_20_sspa?keywords=rpi+3+case&qid=1582660401&sr=8-20-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUExTFAwQlBOUVRaUVZYJmVuY3J5cHRlZElkPUEwNTU4NjMwMVg3VzMxTVNaRjJRWiZlbmNyeXB0ZWRBZElkPUEwNTg5MzI3TVRINUxaWlI2QkUxJndpZGdldE5hbWU9c3BfYnRmJmFjdGlvbj1jbGlja1JlZGlyZWN0JmRvTm90TG9nQ2xpY2s9dHJ1ZQ==">Case for Raspberry Pi</a></li>
+          <li><a href="https://www.amazon.com/gp/product/B072FS4WMK/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1">SMA Cables</a></li>
+          <li><a href="https://www.amazon.com/gp/product/B076Z83QTT/ref=ppx_yo_dt_b_asin_title_o04_s00?ie=UTF8&psc=1">USB Cable</a></li>
+          <li><a href="https://www.amazon.com/Bosch-CCSCL-Large-Custom-System/dp/B073HP1JG6/ref=sr_1_14?keywords=bosch+small+case&qid=1582660689&sr=8-14">Bosch Case</a></li>
+          <li><a href="https://www.amazon.com/gp/product/B0751S46TS/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1">Commander Strips</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div style="font-size: 0.9rem; font-family: Menlo,Monaco,Consolas,Courier New,monospace;" class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Passes</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="all_passes">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+
+    <script src="s3-vars.js"></script>
+    <script src="wx-ground-station.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        load();
+      });
+    </script>
+
+  </body>
+</html>
