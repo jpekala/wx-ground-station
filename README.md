@@ -42,7 +42,7 @@ The scripts that run on the RPI are powered by Node.js and the AWS JavaScript SD
 
 Your credentials file on the Raspberry Pi `~/.aws/credentials` will look like this:
 
-```
+``` text
 [default]
 aws_access_key_id = YOUR_ACCESS_KEY_ID
 aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
@@ -50,7 +50,7 @@ aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
 
 Set the default region where your S3 bucket will reside in `~/.aws/config`. For example:
 
-```
+``` text
 [default]
 output = json
 region = us-west-1
@@ -63,7 +63,7 @@ Now create an S3 bucket for public website hosting such as `wximages`. The follo
 
 At this point you should be able to load a simple web site from your new bucket. You might want to upload a simple `index.html` file and try to load it in your browser with `http://BUCKETNAME.s3-website-REGION.amazonaws.com/`.
 
-```
+``` html
 <!doctype html>
 <html>
  <head><title>S3 test</title></head>
@@ -79,7 +79,7 @@ To give public users the ability to access your S3 bucket using the AWS SDK, you
 
 **Step 2:** on the Sample Code page, select JavaScript from the Platform list. Save this code somewhere, because we need to add it to the web content later. It looks something like this:
 
-```
+``` javascript
 // Initialize the Amazon Cognito credentials provider
 AWS.config.region = 'us-west-1'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -89,7 +89,7 @@ AWS.config.credentials = new AWS.CognitoIdentityCredentials({
 
 **Step 3:** Add a Policy to the Created IAM Role. In [IAM console](https://console.aws.amazon.com/iam/), choose `Policies`. Click `Create Policy`, then click the JSON tab and add this, substituting BUCKET_NAME with your bucket name.
 
-```
+``` json
 {
  "Version": "2012-10-17",
  "Statement": [
@@ -112,7 +112,7 @@ In IAM console, click `Roles`, then choose the unauthenticated user role previou
 
 **Step 4.** Set CORS configuration on the S3 bucket. In the S3 console for your bucket, select `Permissions`, then `CORS configuration`.
 
-```
+``` xml
 <?xml version="1.0" encoding="UTF-8"?>
 <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
  <CORSRule>
@@ -123,12 +123,13 @@ In IAM console, click `Roles`, then choose the unauthenticated user role previou
  </CORSRule>
 </CORSConfiguration>
 ```
+
 ### Raspberry Pi Setup
 
 Install Required Packages
 First, make sure your Raspberry Pi is up to date:
 
-```
+``` bash
 sudo apt-get update
 sudo apt-get upgrade
 sudo reboot
@@ -136,7 +137,7 @@ sudo reboot
 
 Then install a set of of required packages.
 
-```
+``` bash
 sudo apt-get install libusb-1.0
 sudo apt-get install cmake
 sudo apt-get install sox
@@ -146,14 +147,16 @@ sudo apt-get install predict
 
 I used Node.js in some of the scripting, so if you don’t have `node` and `npm` installed, you’ll need to do that. In depth [details are here](https://github.com/nodesource/distributions/#deb), and I easily installed with:
 
-```
+``` bash
 curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 sudo apt-get install -y nodejs
+sudo npm install -g serverless
+sudo chown -R $USER:$(id -gn $USER) /root/.config
 ```
 
-Using your favorite editor as root (e.g. `nano`), create a file `/etc/modprobe.d/no-rtl.conf` and add these contents:
+Using your favorite editor as root (e.g. `nano`), create a file `sudo nano /etc/modprobe.d/no-rtl.conf` and add these contents:
 
-```
+```bash
 blacklist dvb_usb_rtl28xxu
 blacklist rtl2832
 blacklist rtl2830
@@ -163,7 +166,7 @@ blacklist rtl2830
 
 Even if you have `rtl-sdr` already built and installed, it’s important to use the version in the GitHub repo [keenerd/rtl-sdr](https://github.com/keenerd/rtl-sdr), as this version’s `rtl_fm` command can create the WAV file header needed to decode the data with `sox`.
 
-```
+``` bash
 cd ~
 git clone https://github.com/keenerd/rtl-sdr.git
 cd rtl-sdr/
@@ -182,20 +185,20 @@ sudo reboot
 
 The program `wxtoimg` is what does the heavy lifting in this project. It decodes the audio files received by the RTL-SDR receiver and converts the data to images. The original author of wxtoimg has abandoned the project, but it is mirrored at [wxtoimgrestored.xyz](https://wxtoimgrestored.xyz/).
 
-```
+``` bash
 wget https://wxtoimgrestored.xyz/beta/wxtoimg-armhf-2.11.2-beta.deb
 sudo dpkg -i wxtoimg-armhf-2.11.2-beta.deb
 ```
 
 Now run `wxtoimg` once to accept the license agreement.
 
-```
+``` bash
 wxtoimg
 ```
 
-Create a file `~/.wxtoimgrc` with the location of your base station. As usual, negative latitude is southern hemisphere, and negative longitude is western hemisphere. Here is what it would look like for the White House as an example.
+Create a file `nano ~/.wxtoimgrc` with the location of your base station. As usual, negative latitude is southern hemisphere, and negative longitude is western hemisphere. Here is what it would look like for the White House as an example.
 
-```
+``` bash
 Latitude: 38.8977
 Longitude: -77.0365
 Altitude: 15
@@ -209,7 +212,7 @@ You can enter whatever you want for the callsign such as your amateur radio call
 
 The following scripts will automate the thumbnail images and then upload all images to S3. The git repo can be cloned anywhere on your Raspberry Pi. The `configure.sh` script sets the installation directory in the scripts and schedules a cron job to run the satellite pass scheduler job at midnight every night. The scheduler identifies times when each satellite will pass overhead and create an `at` one time job to start the recording, processing, and upload steps.
 
-```
+``` bash
 git clone https://github.com/alonsovargas3/wx-ground-station.git
 cd wx-ground-station
 sh configure.sh
@@ -219,7 +222,7 @@ npm install
 
 In the file `aws-s3/.env` set REGION, BUCKET, and STATION_LOCATION to the correct values. The Node.js script prepares the images for upload by creating thumbnail images, optionally printing some metadata on the images, and creating a JSON metadata file for each image capture. If you choose to add a watermark the STATION_LOCATION string will be printed on the images that you capture. Here are my values just for reference.
 
-```
+``` bash
 #S3
 AWS_REGION=us-west-2
 AWS_BUCKET=wx.k6kzo.com
@@ -237,7 +240,7 @@ After that, you will need to setup the API that will provide all of the pass dat
 
 To deploy your API follow these commands:
 
-```
+``` bash
 cd aws-api
 npm install
 sls deploy
@@ -245,7 +248,7 @@ sls deploy
 
 This will build your database in DynamoDB, create a Lambda service that will read the information from DynamoDB, and create an API Gateway to access the information from Lambda. When the process completes you should see the Service Information. You will need to find the following value. Note that your URL will be different.
 
-```
+``` bash
 endpoints:
  GET - https://e78uek07l4.execute-api.us-west-2.amazonaws.com/prod/passes
 ```
@@ -254,7 +257,7 @@ Record this value to add to the PASS_URL in the next steps when you update `s3-v
 
 You'll also want to confirm you see the following value right under the endpoint:
 
-```
+``` bash
 functions:
  getPasses: passes-prod-getPasses
 ```
@@ -265,7 +268,7 @@ Next you will need to make some changes to the web content. The web interface us
 
 Next, in the file `website/s3-vars.js`, set your bucket name, AWS region, AWS credentials (the Cognito identity pool info you saved above), Mapbox token, and your ground station info. Some of my values are shown here for reference.
 
-```
+``` javascript
 var bucketName = 'wx.k6kzo.com';
 AWS.config.region = 'us-west-2'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -287,7 +290,7 @@ const PASS_URL = "[Serverless API Endpoint]";
 
 Upload the the contents of the `website` directory to your S3 bucket using the S3 console. Since you probably edited the files on your Raspberry Pi, you might need to copy them to your computer where you are accessing AWS using a browser. Whatever the case, these files need to be uploaded to the top level of your bucket. IMPORTANT: be sure to grant public access to the files when you upload them!
 
-```
+``` bash
 index.html
 wx-ground-station.js
 s3-vars.js
@@ -302,14 +305,14 @@ Of course, you can replace `logo.png` with your own, or just remove the `<img>` 
 
 Now that everything is configured, let’s run the scheduling script to schedule recording of upcoming satellite passes. This way you can have a look today instead of waiting until they get scheduled at midnight. This step will also upload a JSON file with the upcoming passes info to your website.
 
-```
+``` bash
 cd wx-ground-station
 ./schedule_all.sh
 ```
 
 You can now visit your AWS S3 website endpoint at
 
-```
+``` url
 http://BUCKETNAME.s3-website-REGION.amazonaws.com/
 ```
 
@@ -319,17 +322,17 @@ The `wxtoimg` enhancements that are displayed depends on what sensors were activ
 
 Not all images you capture will be good; the satellite may be too low or you may not get a good signal. You can clean up bad ones by using the script `aws-s3/remove-wx-images.js` on the Raspberry Pi. Just provide the key to the particular capture as an argument to remove all the images and the metadata from the S3 bucket.
 
-```
+``` bash
 node aws-s3/remove-wx-images.js NOAA19-20191108-162650
 ```
 
 In the next few hours you’ll be able to see some images uploaded, depending on when satellites are scheduled to fly over. You may get up to 12 passes per day, usually 2 for each of the NOAA satellites in the morning, then 2 more for each of them in the evening.
 
-**Note - If you are upgrading from a previous version follow the steps below**
+#### Note - If you are upgrading from a previous version follow the steps below
 
 You may be upgrading from a previous version and need to upload all of your information. First you will need to replace your installation with the one in this project. After that is complete, manually upload all JSON files into the images folder of your S3 bucket. After that you will be able to use the file `aws-s3/upload-existing.js` on the Raspberry Pi. To do so run the following command:
 
-```
+``` bash
 node aws-s3/upload_existing.js
 ```
 
@@ -349,7 +352,7 @@ You can also install a low noise amplifier (LNA) to improve reception (results a
 
 In Linux or MacOS download the source from git, compile it the same way you do the regular RTL-SDR drivers, and then run ./rtl_biast -b 1 to turn the bias tee on and ./rtl_biast -b 0 to turn the bias tee off. The procedure is:
 
-```
+``` bash
 git clone https://github.com/rtlsdrblog/rtl-sdr-blog
 cd rtl-sdr-blog
 mkdir build

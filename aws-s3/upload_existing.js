@@ -1,5 +1,5 @@
 // Read Synchrously
-require('dotenv').config();
+require('dotenv').config({path:'/home/pi/wx-ground-station/aws-s3/.env'});
 
 // AWS Configuration
 var REGION = process.env.AWS_REGION;

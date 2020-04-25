@@ -41,9 +41,9 @@ function load() {
 
     // Function to convert time for each pass
     function convertToLocal(date,time){
-      var combinedDate = date + " " + time.replace(" +0000","");
-      var local = moment.utc(combinedDate).local().format('YYYY-MM-DD HH:mm:ss');
-      return local;
+      var combinedDate = date + " " + time.replace(" -0400","");
+      //var local = moment.utc(combinedDate).local().format('YYYY-MM-DD HH:mm:ss');
+      return combinedDate;
     }
 
     // Pagination
@@ -111,7 +111,7 @@ function load() {
       $('#previous_passes').append([
         '<div class="row" style="margin-bottom: 8px;" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">',
           '<div style="margin-bottom:10px;" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">',
-            '<div>orbital elements:</div>',
+            '<div>Two-line element:</div>',
             '<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">', m.tle1.replace(/ /g, " "), '</div>',
             '<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-12">', m.tle2.replace(/ /g, " "), '</div>',
           '</div>',
@@ -348,23 +348,25 @@ function getUpcomingPassInfo() {
     var endDate = new Date(nextPass.end + processingTime);
     // Populates upcoming_passes <div> with next pass information
     $("#upcoming_passes").append([
-      '<div>',
-      '<h5>next image capture: ',
+      '<h6>',
+      '<strong>Next Satellite: </strong>',
       satLink,
       ' ',
       nextPass.direction,
       ' at ',
       nextPass.elevation,
       '&deg elevation',
-      '</h5>',
-      '<h5>capture begins at: ',
+      '<strong> | Capture start time: </strong>',
       ("0" + startDate.getHours()).slice(-2) + ":" + ("0" + startDate.getMinutes()).slice(-2),
-      '</h5>',
-      '<h5>imagery approx: ',
+      '<strong> | Capture approx uploaded: </strong>',
       ("0" + endDate.getHours()).slice(-2) + ":" + ("0" + endDate.getMinutes()).slice(-2),
-      '</h5>',
-      '</div>'].join('')
+      '</h6>'].join('')
     );
+    // Populates tracking map header with Satellite name
+    $("#map_header").append([
+      '<strong>Tracking: </strong>',
+      satLink].join('')
+      );
 
     // Get location of satellite for next pass for the current time
     lastPositionOfNextPass = tlejs.getLatLon([nextPass.tle1, nextPass.tle2], new Date().getTime());
