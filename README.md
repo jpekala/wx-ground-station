@@ -1,6 +1,6 @@
 # Automated NOAA Weather Satellite Ground Station
 
-![Example Weather Capture](documentation/example-mcir-precip.png "MCIR with Precipitation")
+![Example Weather Capture](documentation/new-example-mcir-precip.png "MCIR with Precipitation")
 
 ## Introduction
 
